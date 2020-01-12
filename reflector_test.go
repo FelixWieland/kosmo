@@ -1,7 +1,6 @@
 package kosmo
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -16,10 +15,27 @@ type ActivityItem struct {
 	Label          string
 }
 
-func (a ActivityItem) Resolve(args struct {
+type ResolveActivityItemArguments struct {
 	Name  string
 	Index int
-}) (interface{}, error) {
+}
+
+type ActivityItems []ActivityItem
+
+func (as ActivityItems) Resolve(args ResolveActivityItemArguments) (ActivityItems, error) {
+	item := ActivityItem{
+		Label: args.Name + "Test",
+	}
+
+	items := ActivityItems{}
+
+	items = append(items, item)
+	items = append(items, item)
+
+	return items, nil
+}
+
+func (a ActivityItem) Resolve(args ResolveActivityItemArguments) (interface{}, error) {
 	return ActivityItem{
 		Label: args.Name,
 	}, nil
@@ -50,19 +66,28 @@ func TestReflectArgsFromResolver(t *testing.T) {
 func TestResolverFactory(t *testing.T) {
 	resolver := resolverFactory(reflectResolverMethod(ActivityItem{}))
 	args := make(map[string]interface{})
-	args["name"] = "test1"
-	args["index"] = 1
-	value, _ := resolver(graphql.ResolveParams{
+	args["Name"] = "test1"
+	args["Index"] = 1
+	value, err := resolver(graphql.ResolveParams{
 		Args: args,
 	})
-	prprint(value)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	structured := value.(ActivityItem)
+
+	if structured.Label != "test1" {
+		t.Fail()
+	}
 }
 
 func BenchmarkResolverFactory(b *testing.B) {
 	resolver := resolverFactory(reflectResolverMethod(ActivityItem{}))
 	args := make(map[string]interface{})
-	args["name"] = "test1"
-	args["index"] = 1
+	args["Name"] = "test1"
+	args["Index"] = 1
 	for n := 0; n < b.N; n++ {
 		resolver(graphql.ResolveParams{
 			Args: args,
@@ -73,26 +98,18 @@ func BenchmarkResolverFactory(b *testing.B) {
 func BenchmarkNonReflectedResolver(b *testing.B) {
 	item := ActivityItem{}
 	for n := 0; n < b.N; n++ {
-		item.Resolve(struct {
-			Name  string
-			Index int
-		}{
-			"test2",
-			1,
-		})
+		item.Resolve(
+			ResolveActivityItemArguments{
+				"test2",
+				1,
+			})
 	}
 }
 
-func TestMapstruct(t *testing.T) {
-	args := make(map[string]interface{})
-	args["label"] = "test"
-	args["index"] = 1
-
-	store := ActivityItem{}
-
-	jsonbody, _ := json.Marshal(args)
-	if err := json.Unmarshal(jsonbody, &store); err != nil {
-		// do error check
+func TestReflectArray(t *testing.T) {
+	graph := sliceToGraph(ActivityItems{})
+	if graph == nil {
+		t.Fail()
 	}
-	// prprint(store)
+	prprint(graph)
 }

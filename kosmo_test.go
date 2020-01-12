@@ -7,21 +7,32 @@ type Item struct {
 	Description string
 }
 
+type Items []Item
+
 type CreateItem Item
 
-func (i Item) Resolve(args struct{ name string }) (interface{}, error) {
+type ResolveItemArguments struct{ name string }
+
+func (i Item) Resolve(args ResolveItemArguments) (interface{}, error) {
 	prprint("Test")
 	return Item{}, nil
 }
 
-func (i CreateItem) Resolve(args struct{ name string }) (interface{}, error) {
-	prprint("Test2")
+func (i CreateItem) Resolve(args ResolveItemArguments) (interface{}, error) {
 	return CreateItem{}, nil
+}
+
+func (is Items) Resolve(args ResolveItemArguments) (interface{}, error) {
+	return Items{}, nil
 }
 
 func TestKosmo(t *testing.T) {
 	item2 := CreateItem{
 		Name: "test",
 	}
-	item2.Resolve(struct{ name string }{name: "test"})
+
+	ksm := Service{}
+	ksm.Queries(Item{}, Items{}).Mutations(CreateItem{}).Start()
+
+	item2.Resolve(ResolveItemArguments{name: "test"})
 }

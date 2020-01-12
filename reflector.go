@@ -3,23 +3,30 @@ package kosmo
 import (
 	"reflect"
 
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/graphql-go/graphql"
 )
+
+type metaInformations struct {
+	name        string
+	description string
+}
 
 func reflectGormType(gormschema interface{}) interface{} {
 	_, fields := describeStruct(gormschema)
 	return fields
 }
 
-func describeStruct(genStruct interface{}) (string, []reflect.StructField) {
-	t := reflect.TypeOf(genStruct)
+func fieldsFromType(t reflect.Type) []reflect.StructField {
 	fields := []reflect.StructField{}
 	for i := 0; i < t.NumField(); i++ {
 		fields = append(fields, t.Field(i))
 	}
-	return t.Name(), fields
+	return fields
+}
+
+func describeStruct(genStruct interface{}) (string, []reflect.StructField) {
+	t := reflect.TypeOf(genStruct)
+	return t.Name(), fieldsFromType(t)
 }
 
 func nativeTypeToGraphQL(typeName string) graphql.Type {
@@ -41,19 +48,34 @@ func nativeFieldToGraphQL(field reflect.StructField) graphql.Field {
 	}
 }
 
+func reflectedFieldsToGraphQL(fields []reflect.StructField) *graphql.Fields {
+	graphQLFields := graphql.Fields{}
+	for _, field := range fields {
+		typ := nativeFieldToGraphQL(field)
+		graphQLFields[field.Name] = &typ
+	}
+	return &graphQLFields
+}
+
 func structToGraph(genStruct interface{}) *graphql.Object {
 	name, infos := describeStruct(genStruct)
-	fields := graphql.Fields{}
-	for _, field := range infos {
-		typ := nativeFieldToGraphQL(field)
-		fields[field.Name] = &typ
-	}
+	fields := reflectedFieldsToGraphQL(infos)
 	return graphql.NewObject(
 		graphql.ObjectConfig{
 			Name:   name,
 			Fields: fields,
 		},
 	)
+}
+
+func sliceToGraph(genSlice interface{}) *graphql.List {
+	underlingType := reflect.TypeOf(genSlice).Elem()
+	fields := fieldsFromType(underlingType)
+	object := graphql.NewObject(graphql.ObjectConfig{
+		Name:   underlingType.Name(),
+		Fields: fields,
+	})
+	return graphql.NewList(object)
 }
 
 func buildQueryField(object *graphql.Object, args graphql.FieldConfigArgument, resolver func(graphql.ResolveParams) (interface{}, error)) graphql.Field {
@@ -103,25 +125,29 @@ func reflectArgsFromResolver(method reflect.Value) graphql.FieldConfigArgument {
 
 func resolverFactory(method reflect.Value) func(graphql.ResolveParams) (interface{}, error) {
 	arg, _ := getArgumentFromResolverMethod(method)
-	_ = arg
+
 	return func(p graphql.ResolveParams) (interface{}, error) {
-		raw := reflect.New(arg).Elem().Interface()
-		err := mapstructure.Decode(p.Args, &raw)
-		if err != nil {
-			panic(err)
+		raw := reflect.New(arg).Elem()
+
+		for key, field := range p.Args {
+			raw.FieldByName(key).Set(reflect.ValueOf(field))
 		}
 
-		inputs := []reflect.Value{
-			reflect.ValueOf(raw),
-		}
+		functionArguments := []reflect.Value{raw}
 
-		returnValues := method.Call(inputs)
-		returnValue := returnValues[0].Interface()
-		returnError := returnValues[1].Interface()
+		results := method.Call(functionArguments)
+		returnValue := results[0].Interface()
+		returnError := results[1].Interface()
 
 		if returnError != nil {
 			return returnValue, returnError.(error)
 		}
 		return returnValue, nil
+	}
+}
+
+func reflectMetaInformations(genVar interface{}) metaInformations {
+	return metaInformations{
+		name: reflect.TypeOf(genVar).Name(),
 	}
 }
