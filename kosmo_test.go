@@ -9,30 +9,29 @@ type Item struct {
 
 type Items []Item
 
-type CreateItem Item
-
 type ResolveItemArguments struct{ name string }
 
-func (i Item) Resolve(args ResolveItemArguments) (interface{}, error) {
+func GetItem(args ResolveItemArguments) (Item, error) {
 	prprint("Test")
 	return Item{}, nil
 }
 
-func (i CreateItem) Resolve(args ResolveItemArguments) (interface{}, error) {
-	return CreateItem{}, nil
-}
-
-func (is Items) Resolve(args ResolveItemArguments) (interface{}, error) {
+func GetItems(args ResolveItemArguments) (Items, error) {
 	return Items{}, nil
 }
 
 func TestKosmo(t *testing.T) {
-	item2 := CreateItem{
-		Name: "test",
+	service := Service{
+		HTTPConfig: HTTPConfig{
+			Port: ":80",
+		},
 	}
+	item := Type(Item{}).Query(GetItem)
+	items := Type(Items{}).Query(GetItems)
 
-	ksm := Service{}
-	ksm.Queries(Item{}, Items{}).Mutations(CreateItem{}).Start()
+	s := service.Schemas(item, items)
 
-	item2.Resolve(ResolveItemArguments{name: "test"})
+	prprint(s)
+
+	s.Start()
 }

@@ -22,20 +22,7 @@ type ResolveActivityItemArguments struct {
 
 type ActivityItems []ActivityItem
 
-func (as ActivityItems) Resolve(args ResolveActivityItemArguments) (ActivityItems, error) {
-	item := ActivityItem{
-		Label: args.Name + "Test",
-	}
-
-	items := ActivityItems{}
-
-	items = append(items, item)
-	items = append(items, item)
-
-	return items, nil
-}
-
-func (a ActivityItem) Resolve(args ResolveActivityItemArguments) (interface{}, error) {
+func GetActivityItem(args ResolveActivityItemArguments) (ActivityItem, error) {
 	return ActivityItem{
 		Label: args.Name,
 	}, nil
@@ -56,7 +43,7 @@ func TestReflectGormStruct(t *testing.T) {
 }
 
 func TestReflectArgsFromResolver(t *testing.T) {
-	args := reflectArgsFromResolver(reflectResolverMethod(ActivityItem{}))
+	args := reflectArgsFromResolver(reflectResolverFunction(GetActivityItem))
 	if args == nil {
 		t.Fail()
 	}
@@ -64,7 +51,7 @@ func TestReflectArgsFromResolver(t *testing.T) {
 }
 
 func TestResolverFactory(t *testing.T) {
-	resolver := resolverFactory(reflectResolverMethod(ActivityItem{}))
+	resolver := resolverFactory(reflectResolverFunction(GetActivityItem))
 	args := make(map[string]interface{})
 	args["Name"] = "test1"
 	args["Index"] = 1
@@ -84,7 +71,7 @@ func TestResolverFactory(t *testing.T) {
 }
 
 func BenchmarkResolverFactory(b *testing.B) {
-	resolver := resolverFactory(reflectResolverMethod(ActivityItem{}))
+	resolver := resolverFactory(reflectResolverFunction(ActivityItem{}))
 	args := make(map[string]interface{})
 	args["Name"] = "test1"
 	args["Index"] = 1
@@ -96,13 +83,11 @@ func BenchmarkResolverFactory(b *testing.B) {
 }
 
 func BenchmarkNonReflectedResolver(b *testing.B) {
-	item := ActivityItem{}
 	for n := 0; n < b.N; n++ {
-		item.Resolve(
-			ResolveActivityItemArguments{
-				"test2",
-				1,
-			})
+		GetActivityItem(ResolveActivityItemArguments{
+			"test2",
+			1,
+		})
 	}
 }
 
@@ -111,5 +96,4 @@ func TestReflectArray(t *testing.T) {
 	if graph == nil {
 		t.Fail()
 	}
-	prprint(graph)
 }

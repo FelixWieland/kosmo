@@ -1,6 +1,10 @@
-package examples
+package main
 
-import "github.com/FelixWieland/kosmo"
+import (
+	"fmt"
+
+	"github.com/FelixWieland/kosmo"
+)
 
 //Passenger holds the data of a passenger
 type Passenger struct {
@@ -20,8 +24,8 @@ type ResolvePassengerArgs struct {
 //ResolvePassengersArgs used to resolve multiple passengers
 type ResolvePassengersArgs struct{}
 
-//Resolve returns a Passenger
-func (p Passenger) Resolve(args ResolvePassengerArgs) (Passenger, error) {
+//GetPassenger returns a Passenger
+func GetPassenger(args ResolvePassengerArgs) (Passenger, error) {
 	return Passenger{
 		ID:   args.ID,
 		Name: "Max",
@@ -29,16 +33,21 @@ func (p Passenger) Resolve(args ResolvePassengerArgs) (Passenger, error) {
 	}, nil
 }
 
-//Resolve returns multiple Passengers
-func (ps Passengers) Resolve(args ResolvePassengersArgs) (Passengers, error) {
+//GetPassengers returns multiple Passengers
+func GetPassengers(args ResolvePassengersArgs) (Passengers, error) {
 	return Passengers{}, nil
 }
 
 func main() {
 	service := kosmo.Service{
 		HTTPConfig: kosmo.HTTPConfig{
-			Port: 80,
+			Port: ":80",
 		},
 	}
-	service.Queries(Passenger{}, Passengers{}).Start()
+	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)
+	passengers := kosmo.Type(Passengers{}).Query(GetPassengers)
+
+	fmt.Printf("%#v", passengers)
+
+	service.Schemas(passenger, passengers).Start()
 }

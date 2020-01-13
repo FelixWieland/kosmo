@@ -2,6 +2,8 @@ package kosmo
 
 import (
 	"reflect"
+	"runtime"
+	"strings"
 
 	"github.com/graphql-go/graphql"
 )
@@ -9,6 +11,12 @@ import (
 type metaInformations struct {
 	name        string
 	description string
+}
+
+type functionInformations struct {
+	metaInformations
+	args     graphql.FieldConfigArgument
+	resolver func(graphql.ResolveParams) (interface{}, error)
 }
 
 func reflectGormType(gormschema interface{}) interface{} {
@@ -69,13 +77,17 @@ func structToGraph(genStruct interface{}) *graphql.Object {
 }
 
 func sliceToGraph(genSlice interface{}) *graphql.List {
+	return graphql.NewList(reflectGraphTypeFromSlice(genSlice))
+}
+
+func reflectGraphTypeFromSlice(genSlice interface{}) *graphql.Object {
 	underlingType := reflect.TypeOf(genSlice).Elem()
 	fields := fieldsFromType(underlingType)
 	object := graphql.NewObject(graphql.ObjectConfig{
 		Name:   underlingType.Name(),
-		Fields: fields,
+		Fields: reflectedFieldsToGraphQL(fields),
 	})
-	return graphql.NewList(object)
+	return object
 }
 
 func buildQueryField(object *graphql.Object, args graphql.FieldConfigArgument, resolver func(graphql.ResolveParams) (interface{}, error)) graphql.Field {
@@ -86,29 +98,22 @@ func buildQueryField(object *graphql.Object, args graphql.FieldConfigArgument, r
 	}
 }
 
-func reflectResolverMethod(genStruct interface{}) reflect.Value {
-	t := reflect.ValueOf(genStruct)
-	method := t.MethodByName("Resolve")
-	empty := reflect.Value{}
-
-	if method == empty {
-		panic(reflect.TypeOf(t).Name() + " does not implement resolve(...interface{}) (interface{}, error)")
-	}
-
-	return method
+func reflectResolverFunction(fn interface{}) reflect.Value {
+	t := reflect.ValueOf(fn)
+	return t
 }
 
-func getArgumentFromResolverMethod(method reflect.Value) (reflect.Type, bool) {
-	if method.Type().NumIn() == 0 {
+func getArgumentFromResolverFunction(fn reflect.Value) (reflect.Type, bool) {
+	if fn.Type().NumIn() == 0 {
 		return nil, false
 	}
-	return method.Type().In(0), true
+	return fn.Type().In(0), true
 }
 
-func reflectArgsFromResolver(method reflect.Value) graphql.FieldConfigArgument {
+func reflectArgsFromResolver(fn reflect.Value) graphql.FieldConfigArgument {
 	argumentConfig := graphql.FieldConfigArgument{}
 
-	arg, hasArgs := getArgumentFromResolverMethod(method)
+	arg, hasArgs := getArgumentFromResolverFunction(fn)
 	if !hasArgs {
 		return argumentConfig
 	}
@@ -123,9 +128,8 @@ func reflectArgsFromResolver(method reflect.Value) graphql.FieldConfigArgument {
 	return argumentConfig
 }
 
-func resolverFactory(method reflect.Value) func(graphql.ResolveParams) (interface{}, error) {
-	arg, _ := getArgumentFromResolverMethod(method)
-
+func resolverFactory(fn reflect.Value) func(graphql.ResolveParams) (interface{}, error) {
+	arg, _ := getArgumentFromResolverFunction(fn)
 	return func(p graphql.ResolveParams) (interface{}, error) {
 		raw := reflect.New(arg).Elem()
 
@@ -135,7 +139,7 @@ func resolverFactory(method reflect.Value) func(graphql.ResolveParams) (interfac
 
 		functionArguments := []reflect.Value{raw}
 
-		results := method.Call(functionArguments)
+		results := fn.Call(functionArguments)
 		returnValue := results[0].Interface()
 		returnError := results[1].Interface()
 
@@ -150,4 +154,31 @@ func reflectMetaInformations(genVar interface{}) metaInformations {
 	return metaInformations{
 		name: reflect.TypeOf(genVar).Name(),
 	}
+}
+
+func reflectFunctionInformations(fn interface{}) functionInformations {
+	reflectedFunction := reflectResolverFunction(fn)
+
+	name := getFunctionName(fn)
+	args := reflectArgsFromResolver(reflectedFunction)
+	resolver := resolverFactory(reflectedFunction)
+
+	return functionInformations{
+		metaInformations: metaInformations{
+			name: name,
+		},
+		args:     args,
+		resolver: resolver,
+	}
+}
+
+func reflectIsFromTypeSlice(genVar interface{}) bool {
+	return reflect.TypeOf(genVar).Kind().String() != "struct"
+}
+
+func getFunctionName(i interface{}) string {
+	nameWithPackage := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+	parts := strings.SplitAfter(nameWithPackage, ".")
+
+	return parts[len(parts)-1]
 }
