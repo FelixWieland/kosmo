@@ -6,14 +6,22 @@ import (
 
 // Service represents a kosmo-microservice
 type Service struct {
-	HTTPConfig HTTPConfig
-	graphQL    graphql.SchemaConfig
+	HTTPConfig    HTTPConfig
+	GraphQLConfig GraphQLConfig
+	graphQL       graphql.SchemaConfig
 }
 
 // HTTPConfig represents the http configurations
 type HTTPConfig struct {
 	Port    string
 	APIBase string
+}
+
+// GraphQLConfig represents the graphql configuraiton options
+type GraphQLConfig struct {
+	UseTypeAsQueryName      bool
+	ReplaceResolverPrefixes bool
+	ResolverPrefixes        []string
 }
 
 // ResolveParams Params for Field.resolve()
@@ -87,7 +95,19 @@ func (t *GraphQLSchema) Mutations(resolverFunctions ...interface{}) *GraphQLSche
 func (s *Service) Schemas(schemas ...GraphQLSchema) *Service {
 	queryConfigs := []graphql.ObjectConfig{}
 	mutationConfigs := []graphql.ObjectConfig{}
+
 	for _, schema := range schemas {
+
+		if s.GraphQLConfig.UseTypeAsQueryName {
+			fields := schema.query.Fields.(graphql.Fields)
+			schema.query.Fields = rewriteFieldNamesToType(fields)
+		}
+
+		if s.GraphQLConfig.ReplaceResolverPrefixes {
+			fields := schema.query.Fields.(graphql.Fields)
+			schema.query.Fields = replaceResolverPrefixes(s.GraphQLConfig.ResolverPrefixes, fields)
+		}
+
 		queryConfigs = append(queryConfigs, schema.query)
 		mutationConfigs = append(mutationConfigs, schema.mutations)
 	}
@@ -101,12 +121,12 @@ func (s *Service) Schemas(schemas ...GraphQLSchema) *Service {
 }
 
 // Start - Starts the http server
-func (s *Service) Start() {
+func (s *Service) Start() error {
 	schema, err := graphql.NewSchema(s.graphQL)
 
 	if err != nil {
 		panic(err)
 	}
 
-	startServer(s.HTTPConfig, schema)
+	return startServer(s.HTTPConfig, schema)
 }

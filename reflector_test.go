@@ -2,9 +2,13 @@ package kosmo
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
+	"github.com/r3labs/diff"
+
 	"github.com/graphql-go/graphql"
+	"gopkg.in/d4l3k/messagediff.v1"
 
 	"github.com/kr/pretty"
 )
@@ -94,6 +98,150 @@ func BenchmarkNonReflectedResolver(b *testing.B) {
 func TestReflectArray(t *testing.T) {
 	graph := sliceToGraph(ActivityItems{})
 	if graph == nil {
+		t.Fail()
+	}
+}
+
+type Product struct {
+	ID    int
+	Name  string
+	Info  string
+	Price int
+}
+
+type ProductList []Product
+
+func TestReflectNativeField(t *testing.T) {
+	f := nativeFieldToGraphQL(reflect.TypeOf(Product{}).Field(0))
+	fa := graphql.Field{
+		Type: graphql.Int,
+	}
+
+	if !reflect.DeepEqual(f, fa) {
+		t.Fail()
+	}
+}
+
+func TestReflectNativeFields(t *testing.T) {
+	oconf := graphql.ObjectConfig{
+		Name: "Product",
+		Fields: graphql.Fields{
+			"ID": &graphql.Field{
+				Type: graphql.Int,
+			},
+			"Name": &graphql.Field{
+				Type: graphql.String,
+			},
+			"Info": &graphql.Field{
+				Type: graphql.String,
+			},
+			"Price": &graphql.Field{
+				Type: graphql.Int,
+			},
+		},
+	}
+	roconf := structToGraphConfig(Product{})
+
+	t1 := getType(oconf.Fields)
+	t2 := getType(roconf.Fields)
+
+	if t1 != t2 {
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(oconf.Fields, roconf.Fields) {
+		diff, err := diff.Diff(oconf, roconf)
+		prprint(err)
+		prprint(diff)
+		t.Fail()
+	}
+}
+
+func TestGrapQlTypeConfigReflection(t *testing.T) {
+	oconf := graphql.ObjectConfig{
+		Name: "Product",
+		Fields: graphql.Fields{
+			"ID": &graphql.Field{
+				Type: graphql.Int,
+			},
+			"Name": &graphql.Field{
+				Type: graphql.String,
+			},
+			"Info": &graphql.Field{
+				Type: graphql.String,
+			},
+			"Price": &graphql.Field{
+				Type: graphql.Int,
+			},
+		},
+	}
+	roconf := structToGraphConfig(Product{})
+
+	if !reflect.DeepEqual(oconf, roconf) {
+		diff, err := diff.Diff(oconf, roconf)
+		prprint(err)
+		prprint(diff)
+		t.Fail()
+	}
+}
+
+func TestGraphQLTypeReflection(t *testing.T) {
+	productType := graphql.NewObject(
+		graphql.ObjectConfig{
+			Name: "Product",
+			Fields: graphql.Fields{
+				"ID": &graphql.Field{
+					Type: graphql.Int,
+				},
+				"Name": &graphql.Field{
+					Type: graphql.String,
+				},
+				"Info": &graphql.Field{
+					Type: graphql.String,
+				},
+				"Price": &graphql.Field{
+					Type: graphql.Int,
+				},
+			},
+		},
+	)
+
+	reflectedProductType := structToGraph(Product{})
+
+	if !reflect.DeepEqual(reflectedProductType, productType) {
+		diff, _ := messagediff.PrettyDiff(reflectedProductType, reflectedProductType)
+		fmt.Printf(diff)
+		t.Fail()
+	}
+
+	productTypeList := graphql.NewList(productType)
+	reflectedProductTypeList := graphql.NewList(reflectGraphTypeFromSlice(ProductList{}))
+
+	if !reflect.DeepEqual(productTypeList, reflectedProductTypeList) {
+		diff, _ := messagediff.PrettyDiff(productTypeList, reflectedProductTypeList)
+		fmt.Printf(diff)
+		t.Fail()
+	}
+
+}
+
+type ResolverArgs struct {
+	ID int
+}
+
+func ResolverArgsTestFn(args ResolverArgs) (interface{}, error) {
+	return nil, nil
+}
+
+func TestFieldConfigArgumentReflection(t *testing.T) {
+	args := graphql.FieldConfigArgument{
+		"ID": &graphql.ArgumentConfig{
+			Type: graphql.Int,
+		},
+	}
+	reflectedArgs := reflectArgsFromResolver(reflectResolverFunction(ResolverArgsTestFn))
+
+	if !reflect.DeepEqual(args, reflectedArgs) {
 		t.Fail()
 	}
 }

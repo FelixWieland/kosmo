@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/FelixWieland/kosmo"
 )
 
@@ -35,19 +33,25 @@ func GetPassenger(args ResolvePassengerArgs) (Passenger, error) {
 
 //GetPassengers returns multiple Passengers
 func GetPassengers(args ResolvePassengersArgs) (Passengers, error) {
-	return Passengers{}, nil
+	return Passengers{
+		Passenger{
+			Name: "Max",
+			Seat: 1,
+		},
+	}, nil
 }
 
 func main() {
 	service := kosmo.Service{
 		HTTPConfig: kosmo.HTTPConfig{
-			Port: ":80",
+			Port: ":8080",
+		},
+		GraphQLConfig: kosmo.GraphQLConfig{
+			UseTypeAsQueryName: true,
 		},
 	}
 	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)
 	passengers := kosmo.Type(Passengers{}).Query(GetPassengers)
-
-	fmt.Printf("%#v", passengers)
 
 	service.Schemas(passenger, passengers).Start()
 }

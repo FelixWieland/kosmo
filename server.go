@@ -32,8 +32,8 @@ func startServer(config HTTPConfig, schema graphql.Schema) error {
 	})
 
 	http.Handle(config.APIBase, h)
-	return http.ListenAndServe(config.Port, nil)
-
+	http.ListenAndServe(config.Port, nil)
+	return nil
 	// http.HandleFunc(config.APIBase, func(w http.ResponseWriter, r *http.Request) {
 	// 	result := executeQuery(r.URL.Query().Get("query"), schema)
 	// 	json.NewEncoder(w).Encode(result)

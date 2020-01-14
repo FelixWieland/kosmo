@@ -8,6 +8,8 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+var alreadyReflectedTypes map[string]*graphql.Object
+
 type metaInformations struct {
 	name        string
 	description string
@@ -56,38 +58,65 @@ func nativeFieldToGraphQL(field reflect.StructField) graphql.Field {
 	}
 }
 
-func reflectedFieldsToGraphQL(fields []reflect.StructField) *graphql.Fields {
+func reflectedFieldsToGraphQL(fields []reflect.StructField) graphql.Fields {
 	graphQLFields := graphql.Fields{}
 	for _, field := range fields {
 		typ := nativeFieldToGraphQL(field)
 		graphQLFields[field.Name] = &typ
 	}
-	return &graphQLFields
+	return graphQLFields
+}
+
+func structToGraphConfig(genStruct interface{}) graphql.ObjectConfig {
+	name, infos := describeStruct(genStruct)
+	fields := reflectedFieldsToGraphQL(infos)
+	return graphql.ObjectConfig{
+		Name:   name,
+		Fields: fields,
+	}
+}
+
+func loadCachedType(name string) *graphql.Object {
+	if len(alreadyReflectedTypes) == 0 {
+		alreadyReflectedTypes = make(map[string]*graphql.Object)
+	}
+	if obj, ok := alreadyReflectedTypes[name]; ok {
+		return obj
+	}
+	return nil
 }
 
 func structToGraph(genStruct interface{}) *graphql.Object {
-	name, infos := describeStruct(genStruct)
-	fields := reflectedFieldsToGraphQL(infos)
-	return graphql.NewObject(
-		graphql.ObjectConfig{
-			Name:   name,
-			Fields: fields,
-		},
-	)
+	conf := structToGraphConfig(genStruct)
+	if obj := loadCachedType(conf.Name); obj != nil {
+		return obj
+	}
+	newObj := graphql.NewObject(conf)
+	alreadyReflectedTypes[conf.Name] = newObj
+	return newObj
+}
+
+func reflectGraphTypeFromSlice(genSlice interface{}) *graphql.Object {
+	conf := reflectGraphConfigFromSlice(genSlice)
+	if obj := loadCachedType(conf.Name); obj != nil {
+		return obj
+	}
+	newObj := graphql.NewObject(conf)
+	alreadyReflectedTypes[conf.Name] = newObj
+	return newObj
 }
 
 func sliceToGraph(genSlice interface{}) *graphql.List {
 	return graphql.NewList(reflectGraphTypeFromSlice(genSlice))
 }
 
-func reflectGraphTypeFromSlice(genSlice interface{}) *graphql.Object {
+func reflectGraphConfigFromSlice(genSlice interface{}) graphql.ObjectConfig {
 	underlingType := reflect.TypeOf(genSlice).Elem()
 	fields := fieldsFromType(underlingType)
-	object := graphql.NewObject(graphql.ObjectConfig{
+	return graphql.ObjectConfig{
 		Name:   underlingType.Name(),
 		Fields: reflectedFieldsToGraphQL(fields),
-	})
-	return object
+	}
 }
 
 func buildQueryField(object *graphql.Object, args graphql.FieldConfigArgument, resolver func(graphql.ResolveParams) (interface{}, error)) graphql.Field {
