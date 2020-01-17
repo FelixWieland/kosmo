@@ -7,7 +7,7 @@ import (
 //Passenger holds the data of a passenger
 type Passenger struct {
 	ID   int
-	Name string
+	Name string `description:"Forename and Surname"`
 	Seat int
 }
 
@@ -53,5 +53,6 @@ func main() {
 	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)
 	passengers := kosmo.Type(Passengers{}).Query(GetPassengers)
 
-	service.Schemas(passenger, passengers).Start()
+	service.Schemas(passenger, passengers).Server().ListenAndServe()
+
 }

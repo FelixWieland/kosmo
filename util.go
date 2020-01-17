@@ -38,3 +38,18 @@ func replaceResolverPrefixes(prefixes []string, fields graphql.Fields) graphql.F
 	}
 	return newFields
 }
+
+func validateResolverArgument(resolverArg interface{}) (interface{}, string) {
+	switch resolverArg.(type) {
+	case Describer:
+		return resolverArg.(Describer).Value, resolverArg.(Describer).Description
+	default:
+		return resolverArg, ""
+	}
+}
+
+func gqlObjFallbackFactory(conf graphql.ObjectConfig) func(SetCache) {
+	return func(set SetCache) {
+		set(graphql.NewObject(conf))
+	}
+}

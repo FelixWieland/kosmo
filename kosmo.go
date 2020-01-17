@@ -1,6 +1,8 @@
 package kosmo
 
 import (
+	"net/http"
+
 	"github.com/graphql-go/graphql"
 )
 
@@ -39,30 +41,34 @@ type GraphQLSchema struct {
 	mutations    graphql.ObjectConfig
 }
 
+// Describer is a wrapper for any type that allows a description
+type Describer struct {
+	Value       interface{}
+	Description string
+}
+
 // Type creates a graphQL Schema
 func Type(typedVar interface{}) GraphQLSchema {
-	if reflectIsFromTypeSlice(typedVar) {
-		return GraphQLSchema{
-			resolverType: sliceToGraph(typedVar),
-		}
-	}
+	typeInfos := reflectTypeInformations(typedVar)
 
 	return GraphQLSchema{
-		resolverType: structToGraph(typedVar),
+		resolverType: typeInfos.typ,
 	}
 }
 
 // Query adds the Query resolver to the Type
 func (t GraphQLSchema) Query(resolverFunction interface{}) GraphQLSchema {
-	fnInfos := reflectFunctionInformations(resolverFunction)
+	functionInfos := reflectFunctionInformations(resolverFunction)
 
 	t.query = graphql.ObjectConfig{
-		Name: "Query",
+		Name:        "Query",
+		Description: "Root for all queries",
 		Fields: graphql.Fields{
-			fnInfos.name: &graphql.Field{
-				Type:    t.resolverType,
-				Args:    fnInfos.args,
-				Resolve: fnInfos.resolver,
+			functionInfos.name: &graphql.Field{
+				Type:        t.resolverType,
+				Args:        functionInfos.args,
+				Resolve:     functionInfos.resolver,
+				Description: functionInfos.description,
 			},
 		},
 	}
@@ -75,18 +81,20 @@ func (t *GraphQLSchema) Mutations(resolverFunctions ...interface{}) *GraphQLSche
 	fields := graphql.Fields{}
 
 	for key := range resolverFunctions {
-		fnInfos := reflectFunctionInformations(resolverFunctions[key])
+		functionInfos := reflectFunctionInformations(resolverFunctions[key])
 
-		fields[fnInfos.name] = &graphql.Field{
-			Type:    t.resolverType,
-			Args:    fnInfos.args,
-			Resolve: fnInfos.resolver,
+		fields[functionInfos.name] = &graphql.Field{
+			Type:        t.resolverType,
+			Args:        functionInfos.args,
+			Resolve:     functionInfos.resolver,
+			Description: functionInfos.description,
 		}
 	}
 
 	t.mutations = graphql.ObjectConfig{
-		Name:   "Mutation",
-		Fields: fields,
+		Name:        "Mutation",
+		Description: "Root for all mutations",
+		Fields:      fields,
 	}
 	return t
 }
@@ -120,13 +128,13 @@ func (s *Service) Schemas(schemas ...GraphQLSchema) *Service {
 	return s
 }
 
-// Start - Starts the http server
-func (s *Service) Start() error {
+// Server - returns the http server
+func (s *Service) Server() *http.Server {
 	schema, err := graphql.NewSchema(s.graphQL)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return startServer(s.HTTPConfig, schema)
+	return server(s.HTTPConfig, schema)
 }

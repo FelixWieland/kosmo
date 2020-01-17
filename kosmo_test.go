@@ -1,6 +1,8 @@
 package kosmo
 
-import "testing"
+import (
+	"testing"
+)
 
 type Item struct {
 	Name        string
@@ -34,11 +36,11 @@ func TestKosmo(t *testing.T) {
 
 	s := service.Schemas(item, items)
 
-	s.Start()
+	s.Server().Close()
 }
 
 type Test struct {
-	Feld string
+	Feld string `description:"TestField"`
 }
 
 type ResolveTestArgs struct {
@@ -60,7 +62,7 @@ func TestMinimalExample(t *testing.T) {
 	}
 
 	test := Type(Test{}).Query(GetTest)
-	service.Schemas(test).Start()
+	service.Schemas(test).Server()
 }
 
 func TestReplaceResolverPrefixExample(t *testing.T) {
@@ -74,6 +76,6 @@ func TestReplaceResolverPrefixExample(t *testing.T) {
 		},
 	}
 
-	test := Type(Test{}).Query(GetTest)
-	service.Schemas(test).Start()
+	test := Type(Test{}).Query(Describer{Value: GetTest, Description: "Returns a Test"})
+	service.Schemas(test).Server().Close()
 }

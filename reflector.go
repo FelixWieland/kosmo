@@ -8,8 +8,6 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-var alreadyReflectedTypes map[string]*graphql.Object
-
 type metaInformations struct {
 	name        string
 	description string
@@ -21,9 +19,9 @@ type functionInformations struct {
 	resolver func(graphql.ResolveParams) (interface{}, error)
 }
 
-func reflectGormType(gormschema interface{}) interface{} {
-	_, fields := describeStruct(gormschema)
-	return fields
+type typeInformations struct {
+	metaInformations
+	typ graphql.Output
 }
 
 func fieldsFromType(t reflect.Type) []reflect.StructField {
@@ -34,11 +32,29 @@ func fieldsFromType(t reflect.Type) []reflect.StructField {
 	return fields
 }
 
-func describeStruct(genStruct interface{}) (string, []reflect.StructField) {
-	t := reflect.TypeOf(genStruct)
-	return t.Name(), fieldsFromType(t)
+func describeStructType(structType reflect.Type) (string, []reflect.StructField) {
+	return structType.Name(), fieldsFromType(structType)
 }
 
+// FIELDS
+
+func reflectedFieldsToGraphQL(fields []reflect.StructField) graphql.Fields {
+	graphQLFields := graphql.Fields{}
+	for _, field := range fields {
+		typ := nativeFieldToGraphQL(field)
+		graphQLFields[field.Name] = &typ
+	}
+	return graphQLFields
+}
+
+func nativeFieldToGraphQL(field reflect.StructField) graphql.Field {
+	return graphql.Field{
+		Type:        nativeTypeToGraphQL(field.Type.Name()),
+		Description: field.Tag.Get("description"),
+	}
+}
+
+// maps go's native types to graphql-go's graphql types
 func nativeTypeToGraphQL(typeName string) graphql.Type {
 	switch typeName {
 	case "int":
@@ -52,23 +68,20 @@ func nativeTypeToGraphQL(typeName string) graphql.Type {
 	}
 }
 
-func nativeFieldToGraphQL(field reflect.StructField) graphql.Field {
-	return graphql.Field{
-		Type: nativeTypeToGraphQL(field.Type.Name()),
-	}
-}
-
-func reflectedFieldsToGraphQL(fields []reflect.StructField) graphql.Fields {
-	graphQLFields := graphql.Fields{}
-	for _, field := range fields {
-		typ := nativeFieldToGraphQL(field)
-		graphQLFields[field.Name] = &typ
-	}
-	return graphQLFields
-}
+// REFLECT CONFIGS -
 
 func structToGraphConfig(genStruct interface{}) graphql.ObjectConfig {
-	name, infos := describeStruct(genStruct)
+	underlingType := reflect.TypeOf(genStruct)
+	return buildObjectConfigFromType(underlingType)
+}
+
+func sliceToGraphConfig(genSlice interface{}) graphql.ObjectConfig {
+	underlingType := reflect.TypeOf(genSlice).Elem()
+	return buildObjectConfigFromType(underlingType)
+}
+
+func buildObjectConfigFromType(reflectedType reflect.Type) graphql.ObjectConfig {
+	name, infos := describeStructType(reflectedType)
 	fields := reflectedFieldsToGraphQL(infos)
 	return graphql.ObjectConfig{
 		Name:   name,
@@ -76,48 +89,21 @@ func structToGraphConfig(genStruct interface{}) graphql.ObjectConfig {
 	}
 }
 
-func loadCachedType(name string) *graphql.Object {
-	if len(alreadyReflectedTypes) == 0 {
-		alreadyReflectedTypes = make(map[string]*graphql.Object)
-	}
-	if obj, ok := alreadyReflectedTypes[name]; ok {
-		return obj
-	}
-	return nil
-}
+// REFLECT TYPES -
 
 func structToGraph(genStruct interface{}) *graphql.Object {
 	conf := structToGraphConfig(genStruct)
-	if obj := loadCachedType(conf.Name); obj != nil {
-		return obj
-	}
-	newObj := graphql.NewObject(conf)
-	alreadyReflectedTypes[conf.Name] = newObj
-	return newObj
-}
-
-func reflectGraphTypeFromSlice(genSlice interface{}) *graphql.Object {
-	conf := reflectGraphConfigFromSlice(genSlice)
-	if obj := loadCachedType(conf.Name); obj != nil {
-		return obj
-	}
-	newObj := graphql.NewObject(conf)
-	alreadyReflectedTypes[conf.Name] = newObj
-	return newObj
+	obj := graphqlObjectCache.Read(conf.Name, gqlObjFallbackFactory(conf)).(*graphql.Object)
+	return obj
 }
 
 func sliceToGraph(genSlice interface{}) *graphql.List {
-	return graphql.NewList(reflectGraphTypeFromSlice(genSlice))
+	conf := sliceToGraphConfig(genSlice)
+	obj := graphqlObjectCache.Read(conf.Name, gqlObjFallbackFactory(conf)).(*graphql.Object)
+	return graphql.NewList(obj)
 }
 
-func reflectGraphConfigFromSlice(genSlice interface{}) graphql.ObjectConfig {
-	underlingType := reflect.TypeOf(genSlice).Elem()
-	fields := fieldsFromType(underlingType)
-	return graphql.ObjectConfig{
-		Name:   underlingType.Name(),
-		Fields: reflectedFieldsToGraphQL(fields),
-	}
-}
+// REFLECT RESOLVER
 
 func buildQueryField(object *graphql.Object, args graphql.FieldConfigArgument, resolver func(graphql.ResolveParams) (interface{}, error)) graphql.Field {
 	return graphql.Field{
@@ -125,11 +111,6 @@ func buildQueryField(object *graphql.Object, args graphql.FieldConfigArgument, r
 		Args:    args,
 		Resolve: resolver,
 	}
-}
-
-func reflectResolverFunction(fn interface{}) reflect.Value {
-	t := reflect.ValueOf(fn)
-	return t
 }
 
 func getArgumentFromResolverFunction(fn reflect.Value) (reflect.Type, bool) {
@@ -179,35 +160,51 @@ func resolverFactory(fn reflect.Value) func(graphql.ResolveParams) (interface{},
 	}
 }
 
-func reflectMetaInformations(genVar interface{}) metaInformations {
-	return metaInformations{
-		name: reflect.TypeOf(genVar).Name(),
-	}
+func reflectTypeKind(genVar interface{}) string {
+	return reflect.TypeOf(genVar).Kind().String()
 }
 
-func reflectFunctionInformations(fn interface{}) functionInformations {
-	reflectedFunction := reflectResolverFunction(fn)
+func getFunctionName(function interface{}) string {
+	nameWithPackage := runtime.FuncForPC(reflect.ValueOf(function).Pointer()).Name()
+	parts := strings.SplitAfter(nameWithPackage, ".")
 
-	name := getFunctionName(fn)
+	return parts[len(parts)-1]
+}
+
+// INFORMATIONS - Endresult
+
+func reflectFunctionInformations(function interface{}) functionInformations {
+	function, description := validateResolverArgument(function)
+	reflectedFunction := reflect.ValueOf(function)
+
+	name := getFunctionName(function)
 	args := reflectArgsFromResolver(reflectedFunction)
 	resolver := resolverFactory(reflectedFunction)
 
 	return functionInformations{
 		metaInformations: metaInformations{
-			name: name,
+			name:        name,
+			description: description,
 		},
 		args:     args,
 		resolver: resolver,
 	}
 }
 
-func reflectIsFromTypeSlice(genVar interface{}) bool {
-	return reflect.TypeOf(genVar).Kind().String() != "struct"
-}
+func reflectTypeInformations(value interface{}) typeInformations {
+	value, description := validateResolverArgument(value)
+	rinfos := typeInformations{
+		metaInformations: metaInformations{
+			description: description,
+		},
+	}
 
-func getFunctionName(i interface{}) string {
-	nameWithPackage := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
-	parts := strings.SplitAfter(nameWithPackage, ".")
+	switch reflectTypeKind(value) {
+	case "struct":
+		rinfos.typ = structToGraph(value)
+	default:
+		rinfos.typ = sliceToGraph(value)
+	}
 
-	return parts[len(parts)-1]
+	return rinfos
 }

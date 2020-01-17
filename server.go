@@ -19,8 +19,7 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 	return result
 }
 
-func startServer(config HTTPConfig, schema graphql.Schema) error {
-
+func server(config HTTPConfig, schema graphql.Schema) *http.Server {
 	if config.APIBase == "" {
 		config.APIBase = "/api"
 	}
@@ -31,13 +30,10 @@ func startServer(config HTTPConfig, schema graphql.Schema) error {
 		GraphiQL: true,
 	})
 
-	http.Handle(config.APIBase, h)
-	http.ListenAndServe(config.Port, nil)
-	return nil
-	// http.HandleFunc(config.APIBase, func(w http.ResponseWriter, r *http.Request) {
-	// 	result := executeQuery(r.URL.Query().Get("query"), schema)
-	// 	json.NewEncoder(w).Encode(result)
-	// })
+	mux := http.NewServeMux()
+	server := http.Server{Addr: config.Port, Handler: mux}
+	mux.HandleFunc(config.APIBase, h.ServeHTTP)
 
-	// return http.ListenAndServe(":"+strconv.Itoa(config.Port), nil)
+	return &server
+
 }

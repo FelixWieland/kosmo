@@ -37,17 +37,14 @@ func prprint(val interface{}) {
 }
 
 func TestReflectGormStruct(t *testing.T) {
-	// reflected := reflectGormType(ActivityItem{})
 	graph := structToGraph(ActivityItem{})
 	if graph == nil {
 		t.Fail()
 	}
-	// prprint(reflected)
-	// prprint(graph)
 }
 
 func TestReflectArgsFromResolver(t *testing.T) {
-	args := reflectArgsFromResolver(reflectResolverFunction(GetActivityItem))
+	args := reflectArgsFromResolver(reflect.ValueOf(GetActivityItem))
 	if args == nil {
 		t.Fail()
 	}
@@ -55,7 +52,7 @@ func TestReflectArgsFromResolver(t *testing.T) {
 }
 
 func TestResolverFactory(t *testing.T) {
-	resolver := resolverFactory(reflectResolverFunction(GetActivityItem))
+	resolver := resolverFactory(reflect.ValueOf(GetActivityItem))
 	args := make(map[string]interface{})
 	args["Name"] = "test1"
 	args["Index"] = 1
@@ -75,7 +72,7 @@ func TestResolverFactory(t *testing.T) {
 }
 
 func BenchmarkResolverFactory(b *testing.B) {
-	resolver := resolverFactory(reflectResolverFunction(ActivityItem{}))
+	resolver := resolverFactory(reflect.ValueOf(ActivityItem{}))
 	args := make(map[string]interface{})
 	args["Name"] = "test1"
 	args["Index"] = 1
@@ -215,7 +212,10 @@ func TestGraphQLTypeReflection(t *testing.T) {
 	}
 
 	productTypeList := graphql.NewList(productType)
-	reflectedProductTypeList := graphql.NewList(reflectGraphTypeFromSlice(ProductList{}))
+
+	config := sliceToGraphConfig(ProductList{})
+	obj := graphqlObjectCache.Read(config.Name, gqlObjFallbackFactory(config)).(*graphql.Object)
+	reflectedProductTypeList := graphql.NewList(obj)
 
 	if !reflect.DeepEqual(productTypeList, reflectedProductTypeList) {
 		diff, _ := messagediff.PrettyDiff(productTypeList, reflectedProductTypeList)
@@ -239,7 +239,7 @@ func TestFieldConfigArgumentReflection(t *testing.T) {
 			Type: graphql.Int,
 		},
 	}
-	reflectedArgs := reflectArgsFromResolver(reflectResolverFunction(ResolverArgsTestFn))
+	reflectedArgs := reflectArgsFromResolver(reflect.ValueOf(ResolverArgsTestFn))
 
 	if !reflect.DeepEqual(args, reflectedArgs) {
 		t.Fail()
