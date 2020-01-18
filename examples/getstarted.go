@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/FelixWieland/kosmo"
 )
 
@@ -24,6 +25,9 @@ type ResolvePassengersArgs struct{}
 
 //GetPassenger returns a Passenger
 func GetPassenger(args ResolvePassengerArgs) (Passenger, error) {
+	if args.ID == 0 {
+		return Passenger{}, errors.New("Es ist ein fehler aufgetreten")
+	}
 	return Passenger{
 		ID:   args.ID,
 		Name: "Max",
@@ -47,7 +51,7 @@ func main() {
 			Port: ":8080",
 		},
 		GraphQLConfig: kosmo.GraphQLConfig{
-			UseTypeAsQueryName: true,
+			// UseTypeAsQueryName: true,
 		},
 	}
 	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)

@@ -7,10 +7,6 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func getType(genVar interface{}) string {
-	return reflect.ValueOf(genVar).Type().Name()
-}
-
 func rewriteFieldNamesToType(fields graphql.Fields) graphql.Fields {
 	newFields := graphql.Fields{}
 	for _, value := range fields {

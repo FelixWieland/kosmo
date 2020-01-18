@@ -45,6 +45,22 @@
   revision = "e2ffdb16a802fe2bb95e2e35ff34f0e53aeef34f"
   version = "v0.1.0"
 
+[[projects]]
+  branch = "master"
+  digest = "1:82294f356d34eee75264d0f9464cf399fe1b878ea73dfae510a739149403c209"
+  name = "github.com/r3labs/diff"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b4ed99a31f5affc1e9e106fdd9507d30f5bbcce6"
+
+[[projects]]
+  digest = "1:653e04c4515b37169ef5874d752f4254e63b4aedb5c8b3a4118e9e3a4e3503e1"
+  name = "gopkg.in/d4l3k/messagediff.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "29f32d820d112dbd66e58492a6ffb7cc3106312b"
+  version = "v1.2.1"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -52,6 +68,8 @@
     "github.com/graphql-go/graphql",
     "github.com/graphql-go/handler",
     "github.com/kr/pretty",
+    "github.com/r3labs/diff",
+    "gopkg.in/d4l3k/messagediff.v1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

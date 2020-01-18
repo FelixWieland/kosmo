@@ -5,10 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/r3labs/diff"
-
 	"github.com/graphql-go/graphql"
-	"gopkg.in/d4l3k/messagediff.v1"
 
 	"github.com/kr/pretty"
 )
@@ -44,7 +41,7 @@ func TestReflectGormStruct(t *testing.T) {
 }
 
 func TestReflectArgsFromResolver(t *testing.T) {
-	args := reflectArgsFromResolver(reflect.ValueOf(GetActivityItem))
+	args := functionToConfigArguments(reflect.ValueOf(GetActivityItem))
 	if args == nil {
 		t.Fail()
 	}
@@ -52,7 +49,7 @@ func TestReflectArgsFromResolver(t *testing.T) {
 }
 
 func TestResolverFactory(t *testing.T) {
-	resolver := resolverFactory(reflect.ValueOf(GetActivityItem))
+	resolver := functionToResolver(reflect.ValueOf(GetActivityItem))
 	args := make(map[string]interface{})
 	args["Name"] = "test1"
 	args["Index"] = 1
@@ -68,27 +65,6 @@ func TestResolverFactory(t *testing.T) {
 
 	if structured.Label != "test1" {
 		t.Fail()
-	}
-}
-
-func BenchmarkResolverFactory(b *testing.B) {
-	resolver := resolverFactory(reflect.ValueOf(ActivityItem{}))
-	args := make(map[string]interface{})
-	args["Name"] = "test1"
-	args["Index"] = 1
-	for n := 0; n < b.N; n++ {
-		resolver(graphql.ResolveParams{
-			Args: args,
-		})
-	}
-}
-
-func BenchmarkNonReflectedResolver(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		GetActivityItem(ResolveActivityItemArguments{
-			"test2",
-			1,
-		})
 	}
 }
 
@@ -147,9 +123,6 @@ func TestReflectNativeFields(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(oconf.Fields, roconf.Fields) {
-		diff, err := diff.Diff(oconf, roconf)
-		prprint(err)
-		prprint(diff)
 		t.Fail()
 	}
 }
@@ -175,9 +148,6 @@ func TestGrapQlTypeConfigReflection(t *testing.T) {
 	roconf := structToGraphConfig(Product{})
 
 	if !reflect.DeepEqual(oconf, roconf) {
-		diff, err := diff.Diff(oconf, roconf)
-		prprint(err)
-		prprint(diff)
 		t.Fail()
 	}
 }
@@ -206,8 +176,6 @@ func TestGraphQLTypeReflection(t *testing.T) {
 	reflectedProductType := structToGraph(Product{})
 
 	if !reflect.DeepEqual(reflectedProductType, productType) {
-		diff, _ := messagediff.PrettyDiff(reflectedProductType, reflectedProductType)
-		fmt.Printf(diff)
 		t.Fail()
 	}
 
@@ -218,8 +186,6 @@ func TestGraphQLTypeReflection(t *testing.T) {
 	reflectedProductTypeList := graphql.NewList(obj)
 
 	if !reflect.DeepEqual(productTypeList, reflectedProductTypeList) {
-		diff, _ := messagediff.PrettyDiff(productTypeList, reflectedProductTypeList)
-		fmt.Printf(diff)
 		t.Fail()
 	}
 
@@ -239,9 +205,32 @@ func TestFieldConfigArgumentReflection(t *testing.T) {
 			Type: graphql.Int,
 		},
 	}
-	reflectedArgs := reflectArgsFromResolver(reflect.ValueOf(ResolverArgsTestFn))
+	reflectedArgs := functionToConfigArguments(reflect.ValueOf(ResolverArgsTestFn))
 
 	if !reflect.DeepEqual(args, reflectedArgs) {
 		t.Fail()
+	}
+}
+
+// BENCHMARKS
+
+func BenchmarkResolverFactory(b *testing.B) {
+	resolver := functionToResolver(reflect.ValueOf(ActivityItem{}))
+	args := make(map[string]interface{})
+	args["Name"] = "test1"
+	args["Index"] = 1
+	for n := 0; n < b.N; n++ {
+		resolver(graphql.ResolveParams{
+			Args: args,
+		})
+	}
+}
+
+func BenchmarkNonReflectedResolver(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		GetActivityItem(ResolveActivityItemArguments{
+			"test2",
+			1,
+		})
 	}
 }
