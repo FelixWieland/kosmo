@@ -27,7 +27,7 @@ func server(config HTTPConfig, schema graphql.Schema) *http.Server {
 	h := handler.New(&handler.Config{
 		Schema:   &schema,
 		Pretty:   true,
-		GraphiQL: true,
+		GraphiQL: config.Playground,
 	})
 
 	mux := http.NewServeMux()

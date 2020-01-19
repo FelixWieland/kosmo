@@ -49,11 +49,12 @@ func GetPassengers(args ResolvePassengersArgs) (Passengers, error) {
 func main() {
 	service := kosmo.Service{
 		HTTPConfig: kosmo.HTTPConfig{
-			Port: ":8080",
+			Playground: true,
+			Port:       ":8080",
 		},
 		GraphQLConfig: kosmo.GraphQLConfig{
-			ReplaceResolverPrefixes: true,
-			ResolverPrefixes:        []string{"Get"},
+			RemoveResolverPrefixes: true,
+			ResolverPrefixes:       []string{"Get"},
 		},
 	}
 	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)

@@ -15,14 +15,15 @@ type Service struct {
 
 // HTTPConfig represents the http configurations
 type HTTPConfig struct {
-	Port    string
-	APIBase string
+	Port       string
+	APIBase    string
+	Playground bool
 }
 
 // GraphQLConfig represents the graphql configuraiton options
 type GraphQLConfig struct {
-	ReplaceResolverPrefixes bool
-	ResolverPrefixes        []string
+	RemoveResolverPrefixes bool
+	ResolverPrefixes       []string
 }
 
 // ResolveParams Params for Field.resolve()
@@ -105,7 +106,7 @@ func (s *Service) Schemas(schemas ...GraphQLSchema) *Service {
 
 	for _, schema := range schemas {
 
-		if s.GraphQLConfig.ReplaceResolverPrefixes {
+		if s.GraphQLConfig.RemoveResolverPrefixes {
 			fields := schema.query.Fields.(graphql.Fields)
 			schema.query.Fields = replaceResolverPrefixes(s.GraphQLConfig.ResolverPrefixes, fields)
 		}

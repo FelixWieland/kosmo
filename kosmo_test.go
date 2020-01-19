@@ -69,8 +69,8 @@ func TestReplaceResolverPrefixExample(t *testing.T) {
 			Port: ":8080",
 		},
 		GraphQLConfig: GraphQLConfig{
-			ReplaceResolverPrefixes: true,
-			ResolverPrefixes:        []string{"Get"},
+			RemoveResolverPrefixes: true,
+			ResolverPrefixes:       []string{"Get"},
 		},
 	}
 

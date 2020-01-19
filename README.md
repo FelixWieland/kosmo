@@ -69,7 +69,7 @@ func main() {
 			Port: ":8080",
 		},
 		GraphQLConfig: kosmo.GraphQLConfig{
-			ReplaceResolverPrefixes: true,
+			RemoveResolverPrefixes: true,
 			ResolverPrefixes:        []string{"Get"},
 		},
 	}
@@ -79,4 +79,61 @@ func main() {
 	service.Schemas(passenger, passengers).Server().ListenAndServe()
 }
 
+```
+
+Request your Service by visiting "http://localhost:8080/" in your Browser and query:
+```graphql
+query {
+	Passengers {
+		Name
+	}
+}
+```
+
+With cURL:
+```bash
+curl --location --request POST 'http://localhost:8080/' \
+	--header 'Content-Type: application/json' \
+	--data-raw '{"query":"\nquery{\nPassengers{\nName\n}\n}","variables":{}}'
+```
+
+With JS-Fetch:
+```js
+var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+
+var graphql = JSON.stringify({
+  query: "\nquery{\nPassengers {\nName\n}\n}",
+  variables: {}
+})
+var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: graphql,
+  redirect: 'follow'
+};
+
+fetch("http://localhost:8080/", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .catch(error => console.log('error', error));
+```
+
+
+# Configurations
+
+A kosmo Service can take the following configurations (the following values are default):
+
+```go
+kosmo.Service{
+		HTTPConfig: kosmo.HTTPConfig{
+			APIBase: "/", 				// Root of the endpoint
+			Port: ":8080",				// Port of the service
+			Playground: false,			// GraphIQL Playground
+		},
+		GraphQLConfig: kosmo.GraphQLConfig{
+			RemoveResolverPrefixes: false,			// Removes the given prefixes from the resolver names 
+			ResolverPrefixes:        []string{},	// Prefixes that should be removed
+		},
+	}
 ```
