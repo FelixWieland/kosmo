@@ -27,9 +27,7 @@ func TestKosmo(t *testing.T) {
 		HTTPConfig: HTTPConfig{
 			Port: ":8080",
 		},
-		GraphQLConfig: GraphQLConfig{
-			UseTypeAsQueryName: true,
-		},
+		GraphQLConfig: GraphQLConfig{},
 	}
 	item := Type(Item{}).Query(GetItem)
 	items := Type(Items{}).Query(GetItems)

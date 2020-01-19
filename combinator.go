@@ -17,7 +17,6 @@ func combineObjectConfig(configs ...graphql.ObjectConfig) graphql.ObjectConfig {
 			}
 			fields[key] = value
 		}
-
 	}
 	combinedConfig.Fields = fields
 	return combinedConfig

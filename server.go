@@ -21,7 +21,7 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 
 func server(config HTTPConfig, schema graphql.Schema) *http.Server {
 	if config.APIBase == "" {
-		config.APIBase = "/api"
+		config.APIBase = "/"
 	}
 
 	h := handler.New(&handler.Config{

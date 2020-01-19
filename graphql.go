@@ -161,7 +161,6 @@ func nativeFieldToGraphQL(field reflect.StructField) graphql.Field {
 	}
 }
 
-// maps go's native types to graphql-go's graphql types
 func nativeTypeToGraphQL(typeName string) graphql.Type {
 	switch typeName {
 	case "int":

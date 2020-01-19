@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+
 	"github.com/FelixWieland/kosmo"
 )
 
@@ -51,12 +52,12 @@ func main() {
 			Port: ":8080",
 		},
 		GraphQLConfig: kosmo.GraphQLConfig{
-			// UseTypeAsQueryName: true,
+			ReplaceResolverPrefixes: true,
+			ResolverPrefixes:        []string{"Get"},
 		},
 	}
 	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)
 	passengers := kosmo.Type(Passengers{}).Query(GetPassengers)
 
 	service.Schemas(passenger, passengers).Server().ListenAndServe()
-
 }

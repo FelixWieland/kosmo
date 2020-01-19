@@ -21,7 +21,6 @@ type HTTPConfig struct {
 
 // GraphQLConfig represents the graphql configuraiton options
 type GraphQLConfig struct {
-	UseTypeAsQueryName      bool
 	ReplaceResolverPrefixes bool
 	ResolverPrefixes        []string
 }
@@ -105,11 +104,6 @@ func (s *Service) Schemas(schemas ...GraphQLSchema) *Service {
 	mutationConfigs := []graphql.ObjectConfig{}
 
 	for _, schema := range schemas {
-
-		if s.GraphQLConfig.UseTypeAsQueryName {
-			fields := schema.query.Fields.(graphql.Fields)
-			schema.query.Fields = rewriteFieldNamesToType(fields)
-		}
 
 		if s.GraphQLConfig.ReplaceResolverPrefixes {
 			fields := schema.query.Fields.(graphql.Fields)
