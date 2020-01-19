@@ -81,7 +81,9 @@ func main() {
 
 ```
 
-Request your Service by visiting "http://localhost:8080/" in your Browser and query:
+# Requests
+
+Request your service by visiting "http://localhost:8080/" in your Browser and query:
 ```graphql
 query {
 	Passengers {
