@@ -234,3 +234,17 @@ func BenchmarkNonReflectedResolver(b *testing.B) {
 		})
 	}
 }
+
+type InnerStructure struct {
+	Number int
+}
+
+type NestedStructure struct {
+	Name   string
+	Nested InnerStructure
+}
+
+func TestNestedStructs(t *testing.T) {
+	tInfos := reflectTypeInformations(NestedStructure{})
+	_ = tInfos
+}

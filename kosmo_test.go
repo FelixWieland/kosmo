@@ -37,8 +37,13 @@ func TestKosmo(t *testing.T) {
 	s.Server().Close()
 }
 
+type Inner struct {
+	Field2 string
+}
+
 type Test struct {
-	Feld string `description:"TestField"`
+	Feld  string `description:"TestField"`
+	Inner Inner
 }
 
 type ResolveTestArgs struct {
@@ -48,6 +53,9 @@ type ResolveTestArgs struct {
 func GetTest(args ResolveTestArgs) (Test, error) {
 	return Test{
 		Feld: args.Name,
+		Inner: Inner{
+			Field2: "InnerName",
+		},
 	}, nil
 }
 
@@ -55,7 +63,8 @@ func TestMinimalExample(t *testing.T) {
 
 	service := Service{
 		HTTPConfig: HTTPConfig{
-			Port: ":8080",
+			Port:       ":8080",
+			Playground: true,
 		},
 	}
 
