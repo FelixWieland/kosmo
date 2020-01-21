@@ -239,9 +239,12 @@ type InnerStructure struct {
 	Number int
 }
 
+type InnerSlice2 []InnerStructure
+
 type NestedStructure struct {
-	Name   string
-	Nested InnerStructure
+	Name        string
+	Nested      InnerStructure
+	NestedSlice InnerSlice2
 }
 
 func TestNestedStructs(t *testing.T) {

@@ -155,15 +155,20 @@ func nativeFieldsToGraphQLFields(fields []reflect.StructField) graphql.Fields {
 }
 
 func nativeFieldToGraphQL(field reflect.StructField) graphql.Field {
-
 	var nTyp graphql.Output
 
-	nTyp = nativeTypeToGraphQL(field.Type.Name())
+	b := field.Type.Kind().String()
+	_ = b
 
-	if nTyp == nil {
+	switch field.Type.Kind().String() {
+	case "struct":
 		conf := buildObjectConfigFromType(field.Type)
-		obj := graphqlObjectCache.Read(conf.Name, gqlObjFallbackFactory(conf)).(*graphql.Object)
-		nTyp = obj
+		nTyp = graphqlObjectCache.Read(conf.Name, gqlObjFallbackFactory(conf)).(*graphql.Object)
+	case "slice":
+		conf := buildObjectConfigFromType(field.Type.Elem())
+		nTyp = graphql.NewList(graphqlObjectCache.Read(conf.Name, gqlObjFallbackFactory(conf)).(*graphql.Object))
+	default:
+		nTyp = nativeTypeToGraphQL(field.Type.Name())
 	}
 
 	return graphql.Field{
@@ -183,6 +188,6 @@ func nativeTypeToGraphQL(typeName string) graphql.Type {
 	case "float":
 		return graphql.Float
 	default:
-		return nil
+		panic(typeName + " is not implemented yet")
 	}
 }

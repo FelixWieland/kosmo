@@ -41,9 +41,12 @@ type Inner struct {
 	Field2 string
 }
 
+type InnerSlice []Inner
+
 type Test struct {
-	Feld  string `description:"TestField"`
-	Inner Inner
+	Feld       string `description:"TestField"`
+	Inner      Inner
+	InnerSlice InnerSlice
 }
 
 type ResolveTestArgs struct {
@@ -69,7 +72,7 @@ func TestMinimalExample(t *testing.T) {
 	}
 
 	test := Type(Test{}).Query(GetTest)
-	service.Schemas(test).Server()
+	service.Schemas(test).Server().ListenAndServe()
 }
 
 func TestReplaceResolverPrefixExample(t *testing.T) {
