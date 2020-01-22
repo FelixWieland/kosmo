@@ -88,7 +88,12 @@ func functionToConfigArguments(fn reflect.Value) graphql.FieldConfigArgument {
 func functionToResolver(fn reflect.Value) func(graphql.ResolveParams) (interface{}, error) {
 	arg, _ := reflectArgumentFromResolverFunction(fn)
 	return func(p graphql.ResolveParams) (interface{}, error) {
-		functionArguments := []reflect.Value{createFunctionStructArgumentFromMap(arg, p.Args)}
+
+		functionArguments := []reflect.Value{}
+		if arg != nil {
+			functionArguments = []reflect.Value{createFunctionStructArgumentFromMap(arg, p.Args)}
+		}
+		
 		results := fn.Call(functionArguments)
 
 		returnValue := results[0].Interface()
