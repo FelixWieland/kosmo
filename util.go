@@ -6,6 +6,9 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+// UTILITY
+// These functions are used for cleaner code
+
 func replaceResolverPrefixes(prefixes []string, fields graphql.Fields) graphql.Fields {
 	newFields := graphql.Fields{}
 	for key, value := range fields {

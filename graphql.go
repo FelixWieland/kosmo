@@ -93,7 +93,7 @@ func functionToResolver(fn reflect.Value) func(graphql.ResolveParams) (interface
 		if arg != nil {
 			functionArguments = []reflect.Value{createFunctionStructArgumentFromMap(arg, p.Args)}
 		}
-		
+
 		results := fn.Call(functionArguments)
 
 		returnValue := results[0].Interface()
@@ -190,7 +190,9 @@ func nativeTypeToGraphQL(typeName string) graphql.Type {
 		return graphql.Int
 	case "string":
 		return graphql.String
-	case "float":
+	case "float32":
+		return graphql.Float
+	case "float64":
 		return graphql.Float
 	default:
 		panic(typeName + " is not implemented yet")
