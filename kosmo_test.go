@@ -96,3 +96,12 @@ func TestReplaceResolverPrefixExample(t *testing.T) {
 	test := Type(Test{}).Query(Describer{Value: GetTest, Description: "Returns a Test"})
 	service.Schemas(test).Server().Close()
 }
+
+func ResolverWithEmptyArgs() (Test, error) {
+	return Test{}, nil
+}
+
+func TestEmptyResolver(t *testing.T) {
+	testType := Type(Test{}).Query(ResolverWithEmptyArgs)
+	_ = testType
+}

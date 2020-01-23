@@ -38,9 +38,6 @@ type ResolvePassengerArgs struct {
 	ID int
 }
 
-//ResolvePassengersArgs used to resolve multiple passengers
-type ResolvePassengersArgs struct{}
-
 //GetPassenger returns a Passenger
 func GetPassenger(args ResolvePassengerArgs) (Passenger, error) {
 	if args.ID == 0 {
@@ -54,7 +51,7 @@ func GetPassenger(args ResolvePassengerArgs) (Passenger, error) {
 }
 
 //GetPassengers returns multiple Passengers
-func GetPassengers(args ResolvePassengersArgs) (Passengers, error) {
+func GetPassengers() (Passengers, error) {
 	return Passengers{
 		Passenger{
 			Name: "Max",
@@ -66,11 +63,12 @@ func GetPassengers(args ResolvePassengersArgs) (Passengers, error) {
 func main() {
 	service := kosmo.Service{
 		HTTPConfig: kosmo.HTTPConfig{
-			Port: ":8080",
+			Playground: true,
+			Port:       ":8080",
 		},
 		GraphQLConfig: kosmo.GraphQLConfig{
 			RemoveResolverPrefixes: true,
-			ResolverPrefixes:        []string{"Get"},
+			ResolverPrefixes:       []string{"Get"},
 		},
 	}
 	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)
@@ -78,7 +76,6 @@ func main() {
 
 	service.Schemas(passenger, passengers).Server().ListenAndServe()
 }
-
 ```
 
 # Requests
