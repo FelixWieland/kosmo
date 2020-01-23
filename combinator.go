@@ -21,11 +21,3 @@ func combineObjectConfig(configs ...graphql.ObjectConfig) graphql.ObjectConfig {
 	combinedConfig.Fields = fields
 	return combinedConfig
 }
-
-func makeGraphQLObject(objectConfig graphql.ObjectConfig) *graphql.Object {
-	if objectConfig.Name == "" {
-		return nil
-	}
-	obj := graphql.NewObject(objectConfig)
-	return obj
-}

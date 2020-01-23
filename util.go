@@ -36,3 +36,11 @@ func gqlObjFallbackFactory(conf graphql.ObjectConfig) func(SetCache) {
 		set(graphql.NewObject(conf))
 	}
 }
+
+func makeGraphQLObject(objectConfig graphql.ObjectConfig) *graphql.Object {
+	if objectConfig.Name == "" {
+		return nil
+	}
+	obj := graphql.NewObject(objectConfig)
+	return obj
+}

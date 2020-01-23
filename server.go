@@ -8,17 +8,6 @@ import (
 	"github.com/graphql-go/handler"
 )
 
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
-	result := graphql.Do(graphql.Params{
-		Schema:        schema,
-		RequestString: query,
-	})
-	if len(result.Errors) > 0 {
-		fmt.Printf("errors: %v", result.Errors)
-	}
-	return result
-}
-
 func server(config HTTPConfig, schema graphql.Schema) *http.Server {
 	if config.APIBase == "" {
 		config.APIBase = "/"
@@ -35,5 +24,15 @@ func server(config HTTPConfig, schema graphql.Schema) *http.Server {
 	mux.HandleFunc(config.APIBase, h.ServeHTTP)
 
 	return &server
+}
 
+func executeQuery(query string, schema graphql.Schema) *graphql.Result {
+	result := graphql.Do(graphql.Params{
+		Schema:        schema,
+		RequestString: query,
+	})
+	if len(result.Errors) > 0 {
+		fmt.Printf("errors: %v", result.Errors)
+	}
+	return result
 }
