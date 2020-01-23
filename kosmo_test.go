@@ -1,7 +1,10 @@
 package kosmo
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/kr/pretty"
 )
 
 type Item struct {
@@ -45,12 +48,16 @@ type InnerSlice []Inner
 
 type Test struct {
 	Feld       string `description:"TestField"`
-	Inner      Inner
+	Inner      Inner  `description:"Test-Nested"`
 	InnerSlice InnerSlice
 }
 
 type ResolveTestArgs struct {
 	Name string
+}
+
+func prprint(val interface{}) {
+	fmt.Printf("%# v", pretty.Formatter(val))
 }
 
 func GetTest(args ResolveTestArgs) (Test, error) {
@@ -72,7 +79,7 @@ func TestMinimalExample(t *testing.T) {
 	}
 
 	test := Type(Test{}).Query(GetTest)
-	service.Schemas(test).Server().ListenAndServe()
+	service.Schemas(test).Server()
 }
 
 func TestReplaceResolverPrefixExample(t *testing.T) {
