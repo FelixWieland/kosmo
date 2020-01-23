@@ -59,39 +59,16 @@
   version = "1.10.1"
 
 [[projects]]
-  digest = "1:5e1af96b3e1f1dbda8e682b35b24a18309e3ce62abb3ee7cdbb38b82d788222a"
+  digest = "1:483aa658b8b58e357a07ebdfcbcb0202b46f0c0f91e9b63c8807f7d4f5cd30f9"
   name = "github.com/smartystreets/goconvey"
   packages = [
-    ".",
+    "convey",
     "convey/gotest",
     "convey/reporting",
-    "web/server/api",
-    "web/server/contract",
-    "web/server/executor",
-    "web/server/messaging",
-    "web/server/parser",
-    "web/server/system",
-    "web/server/watch",
   ]
   pruneopts = "UT"
   revision = "505e419363375c0dc132d3ac02632a4ee32199ca"
   version = "v1.6.4"
-
-[[projects]]
-  branch = "master"
-  digest = "1:4d5aa85ca323dcede4648f2e7f60fc356b1e01f81dada08b802afab8e24644fa"
-  name = "golang.org/x/tools"
-  packages = [
-    "go/ast/astutil",
-    "go/gcexportdata",
-    "go/internal/gcimporter",
-    "go/internal/packagesdriver",
-    "go/packages",
-    "go/types/typeutil",
-    "internal/packagesinternal",
-  ]
-  pruneopts = "UT"
-  revision = "45e69182d161328ca4f95533036ddbaf17de0eaf"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -99,7 +76,7 @@
   input-imports = [
     "github.com/graphql-go/graphql",
     "github.com/graphql-go/handler",
-    "github.com/smartystreets/goconvey",
+    "github.com/smartystreets/goconvey/convey",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

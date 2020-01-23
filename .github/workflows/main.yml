@@ -17,6 +17,8 @@ jobs:
       run: go get github.com/graphql-go/graphql
     - name: Install 'github.com/graphql-go/handler'
       run: go get github.com/graphql-go/handler
+    - name: Install 'github.com/smartystreets/goconvey/convey'
+      run: go get github.com/smartystreets/goconvey/convey
     - name: Checkout code
       uses: actions/checkout@v1
     - name: Test
