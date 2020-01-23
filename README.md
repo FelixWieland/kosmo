@@ -1,5 +1,5 @@
 # kosmo
-[![Actions Status](https://github.com/FelixWieland/kosmo/workflows/Test/badge.svg)](https://github.com/{owner}/{repo}/actions)
+[![Actions Status](https://github.com/FelixWieland/kosmo/workflows/Test/badge.svg)](https://github.com/FelixWieland/kosmo/actions)
 
 <img src="https://i.ibb.co/MspV6Mh/logo.png" align="right"
      title="Kosmo logo" width="120">
