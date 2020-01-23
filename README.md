@@ -39,26 +39,32 @@ type ResolvePassengerArgs struct {
 	ID int
 }
 
-//GetPassenger returns a Passenger
-func GetPassenger(args ResolvePassengerArgs) (Passenger, error) {
-	if args.ID == 0 {
-		return Passenger{}, errors.New("Es ist ein fehler aufgetreten")
-	}
-	return Passenger{
-		ID:   args.ID,
+var demoPassengers Passengers = Passengers{
+	Passenger{
+		ID:   0,
 		Name: "Max",
 		Seat: 1,
-	}, nil
+	},
+	Passenger{
+		ID:   1,
+		Name: "Mia",
+		Seat: 2,
+	},
+}
+
+//GetPassenger returns a Passenger
+func GetPassenger(args ResolvePassengerArgs) (Passenger, error) {
+	for _, passenger := range demoPassengers {
+		if passenger.ID == args.ID {
+			return passenger, nil
+		}
+	}
+	return Passenger{}, errors.New("Passenger not found")
 }
 
 //GetPassengers returns multiple Passengers
 func GetPassengers() (Passengers, error) {
-	return Passengers{
-		Passenger{
-			Name: "Max",
-			Seat: 1,
-		},
-	}, nil
+	return demoPassengers, nil
 }
 
 func main() {
@@ -66,10 +72,6 @@ func main() {
 		HTTPConfig: kosmo.HTTPConfig{
 			Playground: true,
 			Port:       ":8080",
-		},
-		GraphQLConfig: kosmo.GraphQLConfig{
-			RemoveResolverPrefixes: true,
-			ResolverPrefixes:       []string{"Get"},
 		},
 	}
 	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)
