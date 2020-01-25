@@ -25,9 +25,8 @@ func (c *cache) Read(key string, fallback func(setter SetCache)) interface{} {
 	if value, ok := c.store[key]; ok {
 		return value
 	}
-	setter := func(value interface{}) {
+	fallback(func(value interface{}) {
 		c.store[key] = value
-	}
-	fallback(setter)
+	})
 	return c.store[key]
 }

@@ -162,9 +162,6 @@ func nativeFieldsToGraphQLFields(fields []reflect.StructField) graphql.Fields {
 func nativeFieldToGraphQL(field reflect.StructField) graphql.Field {
 	var nTyp graphql.Output
 
-	b := field.Type.Kind().String()
-	_ = b
-
 	switch field.Type.Kind().String() {
 	case "struct":
 		conf := buildObjectConfigFromType(field.Type)
