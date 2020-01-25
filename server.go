@@ -8,7 +8,7 @@ import (
 	"github.com/graphql-go/handler"
 )
 
-func server(config HTTPConfig, schema graphql.Schema) *http.Server {
+func muxServer(config HTTPConfig, schema graphql.Schema) *http.Server {
 	if config.APIBase == "" {
 		config.APIBase = "/"
 	}

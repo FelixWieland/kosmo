@@ -131,5 +131,5 @@ func (s *Service) Server() *http.Server {
 		panic(err)
 	}
 
-	return server(s.HTTPConfig, schema)
+	return muxServer(s.HTTPConfig, schema)
 }

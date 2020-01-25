@@ -6,7 +6,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestServer(t *testing.T) {
+func TestMuxServer(t *testing.T) {
 	Convey("Given a HTTPConfig and a graphql.Schema", t, func() {
 
 	})
