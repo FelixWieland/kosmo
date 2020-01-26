@@ -1,6 +1,7 @@
 package kosmo
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -34,31 +35,51 @@ func TFunctionToResolverWithNoArgs() (TForNestingStruct, error) {
 func TFunctionToResolverWithArgs(args TResolverArguments) (TForNestingStruct, error) {
 	return TForNestingStruct{
 		Field1: args.Field1,
-	}, nil
+	}, errors.New("Test")
 }
 
 func TestReflectFunctionInformations(t *testing.T) {
 	Convey("Given a function", t, func() {
-
+		infos := reflectFunctionInformations(TFunctionToResolverWithArgs)
+		Convey("It should assemble all informations needed for building a graphql resolver", func() {
+			So(infos.metaInformations.name, ShouldEqual, "TFunctionToResolverWithArgs")
+			So(infos.args, ShouldNotBeEmpty)
+			So(infos.resolver, ShouldNotBeEmpty)
+		})
 	})
 }
 
 func TestReflectTypeInformations(t *testing.T) {
 	Convey("Given a struct", t, func() {
-
+		infos := reflectTypeInformations(TNativeFieldToGraphQLStruct{})
+		Convey("It should assemble all informations needed for building a graphql schema", func() {
+			So(infos.metaInformations.description, ShouldEqual, "")
+			So(infos.typ, ShouldNotBeEmpty)
+		})
+	})
+	Convey("Given a slice", t, func() {
+		infos := reflectTypeInformations(TForNestingSlice{})
+		Convey("It should assemble all informations needed for building a graphql schema", func() {
+			So(infos.metaInformations.description, ShouldEqual, "")
+			So(infos.typ, ShouldNotBeEmpty)
+		})
 	})
 }
 
 func TestFunctionToConfigArguments(t *testing.T) {
 	Convey("Given a reflect.Value of a function", t, func() {
 		Convey("In case the function has no args", func() {
+			fieldConfigArgument := functionToConfigArguments(reflect.ValueOf(TFunctionToResolverWithNoArgs))
 			Convey("It should return a empty graphql.FieldConfigArgument", func() {
-
+				So(fieldConfigArgument, ShouldBeEmpty)
 			})
 		})
 		Convey("In case the function has args", func() {
+			fieldConfigArgument := functionToConfigArguments(reflect.ValueOf(TFunctionToResolverWithArgs))
 			Convey("It should return a graphql.FieldConfigArgument with all the fields from its arguments type", func() {
-
+				So(fieldConfigArgument, ShouldNotBeEmpty)
+				So(fieldConfigArgument["Field1"], ShouldNotBeEmpty)
+				So(fieldConfigArgument["Field2"], ShouldNotBeEmpty)
 			})
 		})
 	})
@@ -88,7 +109,7 @@ func TestFunctionToResolver(t *testing.T) {
 				So(val, ShouldResemble, TForNestingStruct{
 					Field1: "Test1",
 				})
-				So(err, ShouldBeNil)
+				So(err, ShouldNotBeNil)
 			})
 		})
 	})
@@ -196,7 +217,7 @@ func TestNativeTypeToGraphQL(t *testing.T) {
 		var typeInt int
 		var typeString string
 		var typeFloat32 float32
-		var typeFloat64 float32
+		var typeFloat64 float64
 
 		Convey("The corresponding graphQL type should be returned", func() {
 			So(nativeTypeToGraphQL(getType(typeInt)), ShouldEqual, graphql.Int)
