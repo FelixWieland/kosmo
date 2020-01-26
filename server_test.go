@@ -11,9 +11,3 @@ func TestMuxServer(t *testing.T) {
 
 	})
 }
-
-func TestExecuteQuery(t *testing.T) {
-	Convey("Given a graphQL query and a graphql.Schema", t, func() {
-
-	})
-}

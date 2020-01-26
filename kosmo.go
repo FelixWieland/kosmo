@@ -126,7 +126,6 @@ func (s *Service) Schemas(schemas ...GraphQLSchema) *Service {
 // Server - returns the http server
 func (s *Service) Server() *http.Server {
 	schema, err := graphql.NewSchema(s.graphQL)
-
 	if err != nil {
 		panic(err)
 	}

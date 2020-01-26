@@ -1,7 +1,6 @@
 package kosmo
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/graphql-go/graphql"
@@ -24,15 +23,4 @@ func muxServer(config HTTPConfig, schema graphql.Schema) *http.Server {
 	mux.HandleFunc(config.APIBase, h.ServeHTTP)
 
 	return &server
-}
-
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
-	result := graphql.Do(graphql.Params{
-		Schema:        schema,
-		RequestString: query,
-	})
-	if len(result.Errors) > 0 {
-		fmt.Printf("errors: %v", result.Errors)
-	}
-	return result
 }
