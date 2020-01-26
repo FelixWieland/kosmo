@@ -35,7 +35,20 @@ func TestCombineObjectConfig(t *testing.T) {
 				},
 			},
 		}
-		combinedConfig := combineObjectConfig(config1, config2)
+		config3 := graphql.ObjectConfig{
+			Name:   "Name1",
+			Fields: nil,
+		}
+		config4 := graphql.ObjectConfig{
+			Name: "Name1",
+			Fields: graphql.Fields{
+				"Test6": &graphql.Field{
+					Name: "Test3",
+				},
+				"Test7": nil,
+			},
+		}
+		combinedConfig := combineObjectConfig(config1, config2, config3, config4)
 		Convey("The graphql.ObjectConfig returned should contain all the fields of the passed in configs", func() {
 			fields := combinedConfig.Fields.(graphql.Fields)
 			_, firstIsOk := fields["Test1"]
