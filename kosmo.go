@@ -48,16 +48,16 @@ type Describer struct {
 }
 
 // Type creates a graphQL Schema
-func Type(typedVar interface{}) GraphQLSchema {
+func Type(typedVar interface{}) *GraphQLSchema {
 	typeInfos := reflectTypeInformations(typedVar)
 
-	return GraphQLSchema{
+	return &GraphQLSchema{
 		resolverType: typeInfos.typ,
 	}
 }
 
 // Query adds the Query resolver to the Type
-func (t GraphQLSchema) Query(resolverFunction interface{}) GraphQLSchema {
+func (t *GraphQLSchema) Query(resolverFunction interface{}) *GraphQLSchema {
 	functionInfos := reflectFunctionInformations(resolverFunction)
 
 	t.query = graphql.ObjectConfig{
@@ -100,7 +100,7 @@ func (t *GraphQLSchema) Mutations(resolverFunctions ...interface{}) *GraphQLSche
 }
 
 // Schemas adds the schemas to the service
-func (s *Service) Schemas(schemas ...GraphQLSchema) *Service {
+func (s *Service) Schemas(schemas ...*GraphQLSchema) *Service {
 	queryConfigs := []graphql.ObjectConfig{}
 	mutationConfigs := []graphql.ObjectConfig{}
 
