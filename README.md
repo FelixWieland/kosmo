@@ -3,6 +3,7 @@
 
 <img src="https://i.ibb.co/MspV6Mh/logo.png" align="right"
      title="Kosmo logo" width="120">
+![LOC](https://sloc.xyz/github/FelixWieland/kosmo)
 
 Kosmo is a microservice library whose goal is to offer GraphQL interfaces through native go types. As a GraphQL implementation it uses the "github.com/graphql-go/graphql" library. Because the GraphQL schema is created by native types and the resolver methods allow typed results to be returned, the service created can not only be used as a web interface, but can also be easily imported and used by other Go programs.
 
