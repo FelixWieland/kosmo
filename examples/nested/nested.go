@@ -24,6 +24,13 @@ func GetRoot() (Root, error) {
 	}, nil
 }
 
+func GetAnotherRoot() (Root, error) {
+	return Root{
+		ID:   1,
+		Name: "Another",
+	}, nil
+}
+
 func GetChild() (Child, error) {
 	return Child{
 		ID:   1,
@@ -42,8 +49,8 @@ func main() {
 			ResolverPrefixes:       []string{"Get"},
 		},
 	}
-	root := kosmo.Type(Root{}).Query(GetRoot)
-	child := kosmo.Type(Child{}).Query(GetChild)
+	root := kosmo.Type(Root{}).Queries(GetRoot, GetAnotherRoot)
+	child := kosmo.Type(Child{}).Queries(GetChild)
 
 	service.Schemas(root, child).Server().ListenAndServe()
 }

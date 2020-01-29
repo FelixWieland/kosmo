@@ -57,22 +57,25 @@ func Type(typedVar interface{}) *GraphQLSchema {
 }
 
 // Query adds the Query resolver to the Type
-func (t *GraphQLSchema) Query(resolverFunction interface{}) *GraphQLSchema {
-	functionInfos := reflectFunctionInformations(resolverFunction)
+func (t *GraphQLSchema) Queries(resolverFunctions ...interface{}) *GraphQLSchema {
+	fields := graphql.Fields{}
+
+	for key := range resolverFunctions {
+		functionInfos := reflectFunctionInformations(resolverFunctions[key])
+
+		fields[functionInfos.name] = &graphql.Field{
+			Type:        t.resolverType,
+			Args:        functionInfos.args,
+			Resolve:     functionInfos.resolver,
+			Description: functionInfos.description,
+		}
+	}
 
 	t.query = graphql.ObjectConfig{
 		Name:        "Query",
 		Description: "Root for all queries",
-		Fields: graphql.Fields{
-			functionInfos.name: &graphql.Field{
-				Type:        t.resolverType,
-				Args:        functionInfos.args,
-				Resolve:     functionInfos.resolver,
-				Description: functionInfos.description,
-			},
-		},
+		Fields:      fields,
 	}
-
 	return t
 }
 

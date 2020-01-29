@@ -42,11 +42,11 @@ func TestType(t *testing.T) {
 	})
 }
 
-func TestQuery(t *testing.T) {
+func TestQueries(t *testing.T) {
 	Convey("Called on a GraphQLSchema, given a function", t, func() {
 		schema := Type(TKosmoStruct{})
-		schema.Query(TResolveKosmoStruct)
-		Convey("The root 'Query' should be added", func() {
+		schema.Queries(TResolveKosmoStruct)
+		Convey("The root 'Queries' should be added", func() {
 			Convey("And the given function should be used to resolve the previously given struct", func() {
 				field := schema.query.Fields.(graphql.Fields)["TResolveKosmoStruct"]
 				infos := reflectFunctionInformations(TResolveKosmoStruct)
@@ -61,7 +61,7 @@ func TestQuery(t *testing.T) {
 func TestMutations(t *testing.T) {
 	Convey("Called on a GraphQLSchema, given a function", t, func() {
 		schema := Type(TKosmoStruct{})
-		schema.Query(TResolveKosmoStruct)
+		schema.Queries(TResolveKosmoStruct)
 		schema.Mutations(TResolveKosmoStruct)
 		Convey("The root 'Mutation' should be added", func() {
 			infos := reflectFunctionInformations(TResolveKosmoStruct)
@@ -80,8 +80,8 @@ func TestSchemas(t *testing.T) {
 			ResolverPrefixes:       []string{"T"},
 		},
 	}
-	schema1 := Type(TKosmoStruct{}).Query(TResolveKosmoStruct).Mutations(TResolveAnotherKosmoStruct)
-	schema2 := Type(TAnotherKosmoStruct{}).Query(TResolveAnotherKosmoStruct).Mutations(TResolveKosmoStruct)
+	schema1 := Type(TKosmoStruct{}).Queries(TResolveKosmoStruct).Mutations(TResolveAnotherKosmoStruct)
+	schema2 := Type(TAnotherKosmoStruct{}).Queries(TResolveAnotherKosmoStruct).Mutations(TResolveKosmoStruct)
 	Convey("Called on a Service, given no GraphQLSchema", t, func() {
 		svcCopy1 := svc.Schemas()
 		So(svcCopy1.graphQL.Query, ShouldBeNil)
@@ -96,8 +96,8 @@ func TestSchemas(t *testing.T) {
 
 func TestServer(t *testing.T) {
 	svc := Service{}
-	schema1 := Type(TKosmoStruct{}).Query(TResolveKosmoStruct).Mutations(TResolveAnotherKosmoStruct)
-	schema2 := Type(TAnotherKosmoStruct{}).Query(TResolveAnotherKosmoStruct).Mutations(TResolveKosmoStruct)
+	schema1 := Type(TKosmoStruct{}).Queries(TResolveKosmoStruct).Mutations(TResolveAnotherKosmoStruct)
+	schema2 := Type(TAnotherKosmoStruct{}).Queries(TResolveAnotherKosmoStruct).Mutations(TResolveKosmoStruct)
 	Convey("Called on a Service", t, func() {
 		Convey("In case the schema is not error free", func() {
 			Convey("It should panic with the returned error message", func() {

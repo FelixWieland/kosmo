@@ -56,8 +56,8 @@ func main() {
 			Port:       ":8080",
 		},
 	}
-	passenger := kosmo.Type(Passenger{}).Query(GetPassenger)
-	passengers := kosmo.Type(Passengers{}).Query(GetPassengers)
+	passenger := kosmo.Type(Passenger{}).Queries(GetPassenger)
+	passengers := kosmo.Type(Passengers{}).Queries(GetPassengers)
 
 	service.Schemas(passenger, passengers).Server().ListenAndServe()
 }

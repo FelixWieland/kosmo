@@ -22,7 +22,7 @@ func TestMuxServer(t *testing.T) {
 			Port: ":8080",
 		},
 	}
-	tMux := Type(TMuxServerSchemaStruct{}).Query(TResolveMuxServerSchema)
+	tMux := Type(TMuxServerSchemaStruct{}).Queries(TResolveMuxServerSchema)
 	Convey("Given a HTTPConfig and a graphql.Schema", t, func() {
 		server := svc.Schemas(tMux).Server()
 		Convey("The returned server should have the port 8080", func() {
