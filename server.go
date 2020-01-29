@@ -1,7 +1,6 @@
 package kosmo
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/NYTimes/gziphandler"
@@ -25,7 +24,6 @@ func muxServer(config HTTPConfig, schema graphql.Schema) *http.Server {
 	server := http.Server{Addr: config.Port, Handler: mux}
 
 	if config.Gzip {
-		fmt.Printf("tesrt")
 		gzippedHandler := gziphandler.GzipHandler(rawHandler)
 		mux.HandleFunc(config.APIBase, gzippedHandler.ServeHTTP)
 	} else {
