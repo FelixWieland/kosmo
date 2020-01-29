@@ -1,7 +1,10 @@
 package kosmo
 
 import (
+	"fmt"
 	"net/http"
+
+	"github.com/NYTimes/gziphandler"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
@@ -12,7 +15,7 @@ func muxServer(config HTTPConfig, schema graphql.Schema) *http.Server {
 		config.APIBase = "/"
 	}
 
-	h := handler.New(&handler.Config{
+	rawHandler := handler.New(&handler.Config{
 		Schema:   &schema,
 		Pretty:   true,
 		GraphiQL: config.Playground,
@@ -20,7 +23,14 @@ func muxServer(config HTTPConfig, schema graphql.Schema) *http.Server {
 
 	mux := http.NewServeMux()
 	server := http.Server{Addr: config.Port, Handler: mux}
-	mux.HandleFunc(config.APIBase, h.ServeHTTP)
+
+	if config.Gzip {
+		fmt.Printf("tesrt")
+		gzippedHandler := gziphandler.GzipHandler(rawHandler)
+		mux.HandleFunc(config.APIBase, gzippedHandler.ServeHTTP)
+	} else {
+		mux.HandleFunc(config.APIBase, rawHandler.ServeHTTP)
+	}
 
 	return &server
 }

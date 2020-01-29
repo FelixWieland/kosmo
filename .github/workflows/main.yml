@@ -19,6 +19,8 @@ jobs:
       run: go get github.com/graphql-go/handler
     - name: Install 'github.com/smartystreets/goconvey/convey'
       run: go get github.com/smartystreets/goconvey/convey
+    - name: Install 'github.com/NYTimes/gziphandler'
+      run: go get -u github.com/NYTimes/gziphandler
     - name: Checkout code
       uses: actions/checkout@v1
     - name: Test

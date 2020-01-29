@@ -18,6 +18,7 @@ type HTTPConfig struct {
 	Port       string
 	APIBase    string
 	Playground bool
+	Gzip       bool
 }
 
 // GraphQLConfig represents the graphql configuraiton options
