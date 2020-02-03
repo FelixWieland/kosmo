@@ -26,6 +26,16 @@ type TResolverArguments struct {
 	Field2 int
 }
 
+type TResolverArgumentsWithIngoredFields struct {
+	Field1 string `kosmo:"ignore"`
+	Field2 int
+}
+
+type TResolverArgumentsWithRequiredFields struct {
+	Field1 string `kosmo:"require"`
+	Field2 int
+}
+
 func TFunctionToResolverWithNoArgs() (TForNestingStruct, error) {
 	return TForNestingStruct{
 		Field1: "Test",
@@ -33,6 +43,18 @@ func TFunctionToResolverWithNoArgs() (TForNestingStruct, error) {
 }
 
 func TFunctionToResolverWithArgs(args TResolverArguments) (TForNestingStruct, error) {
+	return TForNestingStruct{
+		Field1: args.Field1,
+	}, errors.New("Test")
+}
+
+func TFunctionToResolverWithArgsAndIgnoredFields(args TResolverArgumentsWithIngoredFields) (TForNestingStruct, error) {
+	return TForNestingStruct{
+		Field1: args.Field1,
+	}, errors.New("Test")
+}
+
+func TFunctionToResolverWithArgsAndRequiredFields(args TResolverArgumentsWithRequiredFields) (TForNestingStruct, error) {
 	return TForNestingStruct{
 		Field1: args.Field1,
 	}, errors.New("Test")
@@ -77,6 +99,22 @@ func TestFunctionToConfigArguments(t *testing.T) {
 		Convey("In case the function has args", func() {
 			fieldConfigArgument := functionToConfigArguments(reflect.ValueOf(TFunctionToResolverWithArgs))
 			Convey("It should return a graphql.FieldConfigArgument with all the fields from its arguments type", func() {
+				So(fieldConfigArgument, ShouldNotBeEmpty)
+				So(fieldConfigArgument["Field1"], ShouldNotBeEmpty)
+				So(fieldConfigArgument["Field2"], ShouldNotBeEmpty)
+			})
+		})
+		Convey("In case some args in the function are marked as ignored", func() {
+			fieldConfigArgument := functionToConfigArguments(reflect.ValueOf(TFunctionToResolverWithArgsAndIgnoredFields))
+			Convey("The ignored fields should not be returned arguments", func() {
+				So(fieldConfigArgument, ShouldNotBeEmpty)
+				So(fieldConfigArgument["Field1"], ShouldBeNil)
+				So(fieldConfigArgument["Field2"], ShouldNotBeEmpty)
+			})
+		})
+		Convey("In case some args in the function are marked as required", func() {
+			fieldConfigArgument := functionToConfigArguments(reflect.ValueOf(TFunctionToResolverWithArgsAndRequiredFields))
+			Convey("The required function should be a non null type", func() {
 				So(fieldConfigArgument, ShouldNotBeEmpty)
 				So(fieldConfigArgument["Field1"], ShouldNotBeEmpty)
 				So(fieldConfigArgument["Field2"], ShouldNotBeEmpty)

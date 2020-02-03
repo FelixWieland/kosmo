@@ -77,8 +77,20 @@ func functionToConfigArguments(fn reflect.Value) graphql.FieldConfigArgument {
 
 	for i := 0; i < arg.NumField(); i++ {
 		argField := arg.Field(i)
+		config := parseTagConfig(argField.Tag.Get("kosmo"))
+
+		if config.Ignore {
+			continue
+		}
+
+		argumentType := nativeTypeToGraphQL(argField.Type.Name())
+
+		if config.Require {
+			argumentType = graphql.NewNonNull(argumentType)
+		}
+
 		argumentConfig[argField.Name] = &graphql.ArgumentConfig{
-			Type: nativeTypeToGraphQL(argField.Type.Name()),
+			Type: argumentType,
 		}
 	}
 

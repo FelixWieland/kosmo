@@ -18,10 +18,10 @@ type Passengers []Passenger
 
 //ResolvePassengerArgs used to resolve a passenger
 type ResolvePassengerArgs struct {
-	ID int
+	ID int `kosmo:"require"`
 }
 
-var demoPassengers Passengers = Passengers{
+var demoPassengers = Passengers{
 	Passenger{
 		ID:   0,
 		Name: "Max",

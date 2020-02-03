@@ -57,7 +57,7 @@ func Type(typedVar interface{}) *GraphQLSchema {
 	}
 }
 
-// Query adds the Query resolver to the Type
+// Queries adds the Query resolver to the Type
 func (t *GraphQLSchema) Queries(resolverFunctions ...interface{}) *GraphQLSchema {
 	fields := graphql.Fields{}
 
