@@ -1,5 +1,6 @@
 # kosmo
 [![Actions Status](https://github.com/FelixWieland/kosmo/workflows/Test/badge.svg)](https://github.com/FelixWieland/kosmo/actions)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/mod/github.com/FelixWieland/kosmo)
 
 <img src="https://i.ibb.co/MspV6Mh/logo.png" align="right"
      title="Kosmo logo" width="120">
