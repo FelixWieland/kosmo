@@ -136,3 +136,13 @@ func (s *Service) Server() *http.Server {
 
 	return muxServer(s.HTTPConfig, schema)
 }
+
+//Handler - returns the raw HTTP handler
+func (s *Service) Handler() http.Handler {
+	schema, err := graphql.NewSchema(s.graphQL)
+	if err != nil {
+		panic(err)
+	}
+
+	return rawHandler(s.HTTPConfig.Playground, schema)
+}

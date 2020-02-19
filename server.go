@@ -14,11 +14,7 @@ func muxServer(config HTTPConfig, schema graphql.Schema) *http.Server {
 		config.APIBase = "/"
 	}
 
-	rawHandler := handler.New(&handler.Config{
-		Schema:   &schema,
-		Pretty:   true,
-		GraphiQL: config.Playground,
-	})
+	rawHandler := rawHandler(config.Playground, schema)
 
 	mux := http.NewServeMux()
 	server := http.Server{Addr: config.Port, Handler: mux}
@@ -31,4 +27,12 @@ func muxServer(config HTTPConfig, schema graphql.Schema) *http.Server {
 	}
 
 	return &server
+}
+
+func rawHandler(playground bool, schema graphql.Schema) *handler.Handler {
+	return handler.New(&handler.Config{
+		Schema:   &schema,
+		Pretty:   true,
+		GraphiQL: playground,
+	})
 }
