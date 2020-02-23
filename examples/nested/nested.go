@@ -4,11 +4,17 @@ import (
 	"github.com/FelixWieland/kosmo"
 )
 
+//ToIgnore should be ignored
+type ToIgnore struct {
+	field uint64 //this should fail
+}
+
 //Root -
 type Root struct {
-	ID    int
-	Name  string
-	Child Child
+	ToIgnore `kosmo:"ignore"`
+	ID       int
+	Name     string
+	Child    Child
 }
 
 //Child -

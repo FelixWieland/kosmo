@@ -15,6 +15,10 @@ func runtimeFunctionName(function reflect.Value) string {
 func reflectStructInformations(structType reflect.Type) (string, []reflect.StructField) {
 	fields := []reflect.StructField{}
 	for i := 0; i < structType.NumField(); i++ {
+		config := parseTagConfig(structType.Field(i).Tag.Get("kosmo"))
+		if config.Ignore {
+			continue
+		}
 		fields = append(fields, structType.Field(i))
 	}
 	return structType.Name(), fields
