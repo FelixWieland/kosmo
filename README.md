@@ -98,7 +98,7 @@ With cURL:
 ```bash
 curl --location --request POST 'http://localhost:8080/' \
 	--header 'Content-Type: application/json' \
-	--data-raw '{"query":"\nquery{\nPassengers{\nName\n}\n}","variables":{}}'
+	--data-raw '{"query":"\nquery{\GetPassengers{\nName\n}\n}","variables":{}}'
 ```
 
 With JS-Fetch:
@@ -107,7 +107,7 @@ var myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 
 var graphql = JSON.stringify({
-  query: "\nquery{\nPassengers {\nName\n}\n}",
+  query: "\nquery{\GetPassengers {\nName\n}\n}",
   variables: {}
 })
 var requestOptions = {
