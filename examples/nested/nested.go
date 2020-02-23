@@ -17,6 +17,7 @@ type Child struct {
 	Name string
 }
 
+//GetRoot -
 func GetRoot() (Root, error) {
 	return Root{
 		ID:   1,
@@ -24,6 +25,7 @@ func GetRoot() (Root, error) {
 	}, nil
 }
 
+//GetAnotherRoot -
 func GetAnotherRoot() (Root, error) {
 	return Root{
 		ID:   1,
@@ -31,6 +33,7 @@ func GetAnotherRoot() (Root, error) {
 	}, nil
 }
 
+//GetChild -
 func GetChild() (Child, error) {
 	return Child{
 		ID:   1,

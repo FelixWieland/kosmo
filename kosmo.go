@@ -21,7 +21,7 @@ type HTTPConfig struct {
 	Gzip       bool
 }
 
-// GraphQLConfig represents the graphql configuraiton options
+// GraphQLConfig represents the graphql configuration options
 type GraphQLConfig struct {
 	RemoveResolverPrefixes bool
 	ResolverPrefixes       []string
