@@ -1,6 +1,7 @@
 # kosmo
 [![Actions Status](https://github.com/FelixWieland/kosmo/workflows/Test/badge.svg)](https://github.com/FelixWieland/kosmo/actions)
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/mod/github.com/FelixWieland/kosmo)
+[![Go Report Card](https://goreportcard.com/badge/github.com/FelixWieland/kosmo)](https://goreportcard.com/report/github.com/FelixWieland/kosmo)
 
 <img src="https://i.ibb.co/MspV6Mh/logo.png" align="right"
      title="Kosmo logo" width="120">
@@ -87,7 +88,7 @@ func main() {
 Request your service by visiting "http://localhost:8080/" in your Browser and query:
 ```graphql
 query {
-	Passengers {
+	GetPassengers {
 		Name
 	}
 }
