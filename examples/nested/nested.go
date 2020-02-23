@@ -4,11 +4,17 @@ import (
 	"github.com/FelixWieland/kosmo"
 )
 
+//ToIgnore should be ignored
+type ToIgnore struct {
+	field uint64 //this should fail
+}
+
 //Root -
 type Root struct {
-	ID    int
-	Name  string
-	Child Child
+	ToIgnore `kosmo:"ignore"`
+	ID       int
+	Name     string
+	Child    Child
 }
 
 //Child -
@@ -17,6 +23,7 @@ type Child struct {
 	Name string
 }
 
+//GetRoot -
 func GetRoot() (Root, error) {
 	return Root{
 		ID:   1,
@@ -24,6 +31,7 @@ func GetRoot() (Root, error) {
 	}, nil
 }
 
+//GetAnotherRoot -
 func GetAnotherRoot() (Root, error) {
 	return Root{
 		ID:   1,
@@ -31,6 +39,7 @@ func GetAnotherRoot() (Root, error) {
 	}, nil
 }
 
+//GetChild -
 func GetChild() (Child, error) {
 	return Child{
 		ID:   1,

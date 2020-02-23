@@ -21,7 +21,7 @@ type HTTPConfig struct {
 	Gzip       bool
 }
 
-// GraphQLConfig represents the graphql configuraiton options
+// GraphQLConfig represents the graphql configuration options
 type GraphQLConfig struct {
 	RemoveResolverPrefixes bool
 	ResolverPrefixes       []string
@@ -135,4 +135,14 @@ func (s *Service) Server() *http.Server {
 	}
 
 	return muxServer(s.HTTPConfig, schema)
+}
+
+//Handler - returns the raw HTTP handler
+func (s *Service) Handler() http.Handler {
+	schema, err := graphql.NewSchema(s.graphQL)
+	if err != nil {
+		panic(err)
+	}
+
+	return rawHandler(s.HTTPConfig.Playground, schema)
 }

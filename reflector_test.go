@@ -32,7 +32,7 @@ func TestReflectStructInformations(t *testing.T) {
 		Convey(`The first return value (name) should be the name of the type of the passed in type`, func() {
 			So(name, ShouldEqual, "TReflectStructInformationsStruct")
 		})
-		Convey(`The second return value (fields) should have the lenght of the number of fields in that struct`, func() {
+		Convey(`The second return value (fields) should have the length of the number of fields in that struct`, func() {
 			So(len(fields), ShouldEqual, 3)
 		})
 		Convey(`Also should the second return value contains all Field names`, func() {
