@@ -115,7 +115,7 @@ func (s *Service) Schemas(schemas ...*GraphQLSchema) *Service {
 			schema.query.Fields = replaceResolverPrefixes(s.GraphQLConfig.ResolverPrefixes, fields)
 		}
 
-		if schema.mutations.Name != "" {
+		if schema.query.Name != "" {
 			queryConfigs = append(queryConfigs, schema.query)
 		}
 		if schema.mutations.Name != "" {
