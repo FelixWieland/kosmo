@@ -47,6 +47,7 @@ func GetChild() (Child, error) {
 	}, nil
 }
 
+//MutateSomething tests a mutation
 func MutateSomething() (Child, error) {
 	return Child{
 		ID:   1,
@@ -54,6 +55,7 @@ func MutateSomething() (Child, error) {
 	}, nil
 }
 
+//MutateAnother tests a mutation
 func MutateAnother() (Root, error) {
 	return Root{
 		ID:   1,
