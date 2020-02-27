@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/NYTimes/gziphandler"
-
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 )
