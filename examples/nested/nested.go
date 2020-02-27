@@ -47,6 +47,22 @@ func GetChild() (Child, error) {
 	}, nil
 }
 
+//MutateSomething tests a mutation
+func MutateSomething() (Child, error) {
+	return Child{
+		ID:   1,
+		Name: "Mutated",
+	}, nil
+}
+
+//MutateAnother tests a mutation
+func MutateAnother() (Root, error) {
+	return Root{
+		ID:   1,
+		Name: "Mutated",
+	}, nil
+}
+
 func main() {
 	service := kosmo.Service{
 		HTTPConfig: kosmo.HTTPConfig{
@@ -58,7 +74,7 @@ func main() {
 			ResolverPrefixes:       []string{"Get"},
 		},
 	}
-	root := kosmo.Type(Root{}).Queries(GetRoot, GetAnotherRoot)
+	root := kosmo.Type(Root{}).Queries(GetRoot, GetAnotherRoot).Mutations(MutateAnother)
 	child := kosmo.Type(Child{}).Queries(GetChild)
 
 	service.Schemas(root, child).Server().ListenAndServe()

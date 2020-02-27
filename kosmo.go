@@ -18,7 +18,6 @@ type HTTPConfig struct {
 	Port       string
 	APIBase    string
 	Playground bool
-	Gzip       bool
 }
 
 // GraphQLConfig represents the graphql configuration options
@@ -115,8 +114,12 @@ func (s *Service) Schemas(schemas ...*GraphQLSchema) *Service {
 			schema.query.Fields = replaceResolverPrefixes(s.GraphQLConfig.ResolverPrefixes, fields)
 		}
 
-		queryConfigs = append(queryConfigs, schema.query)
-		mutationConfigs = append(mutationConfigs, schema.mutations)
+		if schema.query.Name != "" {
+			queryConfigs = append(queryConfigs, schema.query)
+		}
+		if schema.mutations.Name != "" {
+			mutationConfigs = append(mutationConfigs, schema.mutations)
+		}
 	}
 
 	s.graphQL = graphql.SchemaConfig{

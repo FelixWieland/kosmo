@@ -165,6 +165,10 @@ func buildObjectConfigFromType(reflectedType reflect.Type) graphql.ObjectConfig 
 func nativeFieldsToGraphQLFields(fields []reflect.StructField) graphql.Fields {
 	graphQLFields := graphql.Fields{}
 	for _, field := range fields {
+		config := parseTagConfig(field.Tag.Get("kosmo"))
+		if config.Ignore {
+			continue
+		}
 		typ := nativeFieldToGraphQL(field)
 		graphQLFields[field.Name] = &typ
 	}
