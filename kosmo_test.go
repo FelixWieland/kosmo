@@ -113,3 +113,23 @@ func TestServer(t *testing.T) {
 		})
 	})
 }
+
+func TestHandler(t *testing.T) {
+	svc := Service{}
+	schema1 := Type(TKosmoStruct{}).Queries(TResolveKosmoStruct).Mutations(TResolveAnotherKosmoStruct)
+	schema2 := Type(TAnotherKosmoStruct{}).Queries(TResolveAnotherKosmoStruct).Mutations(TResolveKosmoStruct)
+	Convey("Called on a Service", t, func() {
+		Convey("In case the schema is not error free", func() {
+			Convey("It should panic with the returned error message", func() {
+				So(func() {
+					svc.Schemas().Handler()
+				}, ShouldPanic)
+			})
+		})
+		Convey("In case the schema is error free", func() {
+			Convey("It should return a http.Handler", func() {
+				So(svc.Schemas(schema1, schema2).Handler(), ShouldNotBeEmpty)
+			})
+		})
+	})
+}
