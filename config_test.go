@@ -24,9 +24,13 @@ func TestParseTagConfig(t *testing.T) {
 			So(config3.Require, ShouldBeTrue)
 		})
 		config4 := parseTagConfig("required")
-		Convey("Should also work if provied as simple past", func() {
+		Convey("Should also work if require is provided as simple past", func() {
 			So(config4.Ignore, ShouldBeFalse)
 			So(config4.Require, ShouldBeTrue)
+		})
+		config5 := parseTagConfig("ignored")
+		Convey("Should also work if ignore is provided as simple past", func() {
+			So(config5.Ignore, ShouldBeTrue)
 		})
 	})
 }

@@ -21,6 +21,12 @@ type TNativeFieldToGraphQLStruct struct {
 	Field3 string `description:"Test"`
 }
 
+type TNativeFieldToGraphQLStructWithIgnoredFields struct {
+	Field1 TForNestingStruct `kosmo:"ignore"`
+	Field2 TForNestingSlice  `kosmo:"ignore"`
+	Field3 string            `description:"Test"`
+}
+
 type TResolverArguments struct {
 	Field1 string
 	Field2 int
@@ -203,9 +209,9 @@ func TestBuildObjectConfigFromType(t *testing.T) {
 
 func TestNativeFieldsToGraphQLFields(t *testing.T) {
 	Convey("Given reflected fields of a struct", t, func() {
-		_, fields := reflectStructInformations(reflect.TypeOf(TNativeFieldToGraphQLStruct{}))
-		gqlFields := nativeFieldsToGraphQLFields(fields)
 		Convey("All reflected fields should be mapped to graphql.Fields", func() {
+			_, fields := reflectStructInformations(reflect.TypeOf(TNativeFieldToGraphQLStruct{}))
+			gqlFields := nativeFieldsToGraphQLFields(fields)
 			Convey("The length of the returned fields should equal", func() {
 				So(len(gqlFields), ShouldEqual, len(fields))
 			})
@@ -219,6 +225,14 @@ func TestNativeFieldsToGraphQLFields(t *testing.T) {
 			})
 			Convey("In case a field has no 'description' tag, the description of the field should be a empty string", func() {
 				So(gqlFields["Field1"].Description, ShouldEqual, "")
+			})
+		})
+		Convey("In case a field is ignored", func() {
+			_, fields := reflectStructInformations(reflect.TypeOf(TNativeFieldToGraphQLStructWithIgnoredFields{}))
+			gqlFields := nativeFieldsToGraphQLFields(fields)
+			Convey("It should not be in the returned slice of fields", func() {
+				So(len(gqlFields), ShouldEqual, 1)
+				So(gqlFields["Field3"].Type.Name(), ShouldEqual, "String")
 			})
 		})
 	})
