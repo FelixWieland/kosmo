@@ -138,7 +138,7 @@ kosmo.Service{
 		},
 		GraphQLConfig: kosmo.GraphQLConfig{
 			RemoveResolverPrefixes: false,			// Removes the given prefixes from the resolver names 
-			ResolverPrefixes:        []string{},	// Prefixes that should be removed
+			ResolverPrefixes: []string{},			// Prefixes that should be removed
 		},
 	}
 ```
