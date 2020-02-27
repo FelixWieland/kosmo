@@ -2,7 +2,7 @@
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/mod/github.com/FelixWieland/kosmo)
 [![Actions Status](https://github.com/FelixWieland/kosmo/workflows/Test/badge.svg)](https://github.com/FelixWieland/kosmo/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/FelixWieland/kosmo)](https://goreportcard.com/report/github.com/FelixWieland/kosmo)
-[![Coverage Status](https://coveralls.io/repos/github/FelixWieland/kosmo/badge.svg?branch=coveralls-integration)](https://coveralls.io/github/FelixWieland/kosmo?branch=coveralls-integration)
+[![Coverage Status](https://coveralls.io/repos/github/FelixWieland/kosmo/badge.svg?branch=master)](https://coveralls.io/github/FelixWieland/kosmo?branch=master)
 
 <img src="https://i.ibb.co/MspV6Mh/logo.png" align="right"
      title="Kosmo logo" width="120">
