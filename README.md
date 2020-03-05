@@ -3,6 +3,7 @@
 [![Actions Status](https://github.com/FelixWieland/kosmo/workflows/Test/badge.svg)](https://github.com/FelixWieland/kosmo/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/FelixWieland/kosmo)](https://goreportcard.com/report/github.com/FelixWieland/kosmo)
 [![Coverage Status](https://coveralls.io/repos/github/FelixWieland/kosmo/badge.svg?branch=master&service=github)](https://coveralls.io/github/FelixWieland/kosmo?branch=master)
+[![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/FelixWieland/kosmo/blob/master/LICENSE)
 
 <img src="https://i.ibb.co/MspV6Mh/logo.png" align="right"
      title="Kosmo logo" width="120">
